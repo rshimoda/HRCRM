@@ -1,0 +1,77 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui">
+
+
+    <p:tabView id="tabViewTasksSettings" orientation="left" style="border-right-width: 0px; padding-left: 0px"
+               dynamic="true" cache="false">
+        <p:ajax event="tabChange" listener="#{editModeBean.tabClickHandler}"/>
+        <p:tab disabled="#{editModeBean.editMode}">
+            <f:facet name="title">
+                <p:commandLink value="#{msgs['AdmLeftTab.Candidates']}" actionListener="#{candidatesSettingBean.init()}"
+                               class="settings-tabs" style="padding: 0.5em 1em;"/>
+            </f:facet>
+            <ui:insert name="tabTaskSettingsCandidatesContent">
+                <ui:include src="TaskSettings/CandidatesSettings.xhtml"/>
+            </ui:insert>
+        </p:tab>
+
+        <p:tab disabled="#{editModeBean.editMode}">
+            <f:facet name="title">
+                <p:commandLink value="#{msgs['AdmLeftTab.Marketing']}" class="settings-tabs"/>
+            </f:facet>
+            <h:panelGrid columns="2" cellpadding="10">
+                <p:panel style="width: 670px; height:300px;">
+                    <h3><p:outputLabel value="Marketing Tab"/></h3>
+                    <br/>
+                    <h5><p:outputLabel value="This TAB is not implemented yet"/></h5>
+                    <br/>
+                </p:panel>
+            </h:panelGrid>
+        </p:tab>
+
+        <p:tab disabled="#{editModeBean.editMode}">
+            <f:facet name="title">
+                <p:commandLink value="#{msgs['AdmLeftTab.ODSInternal']}"
+                               actionListener="#{odsInternalSettingsBean.init()}" class="settings-tabs"/>
+            </f:facet>
+            <ui:insert name="tabTaskSettingsODSInternalContent">
+                <ui:include src="TaskSettings/OdsInternalSettings.xhtml"/>
+            </ui:insert>
+        </p:tab>
+
+        <p:tab disabled="#{editModeBean.editMode}">
+            <f:facet name="title">
+                <p:commandLink value="#{msgs['AdmLeftTab.PerformanceAppraisals']}"
+                               actionListener="#{performanceAppraisalSettingBean.init()}" class="settings-tabs"/>
+            </f:facet>
+            <ui:insert name="tabTaskSettingsPerformanceAppraisalContent">
+                <ui:include src="TaskSettings/PerformanceAppraisalSettings.xhtml"/>
+            </ui:insert>
+        </p:tab>
+
+        <p:tab disabled="#{editModeBean.editMode}">
+            <f:facet name="title">
+                <p:commandLink value="#{msgs['AdmLeftTab.Recruitment']}"
+                               actionListener="#{recruitmentSettingsBean.init()}" class="settings-tabs"/>
+            </f:facet>
+            <ui:insert name="tabTaskSettingsRecruitmentContent">
+                <ui:include src="TaskSettings/RecruitmentSettings.xhtml"/>
+            </ui:insert>
+        </p:tab>
+
+        <p:tab disabled="#{editModeBean.editMode}">
+            <f:facet name="title">
+                <p:commandLink value="#{msgs['AdmLeftTab.Projects']}" actionListener="#{projectsSettingsBean.init()}"
+                               class="settings-tabs"/>
+            </f:facet>
+            <ui:insert name="tabTaskSettingsProjects">
+                <ui:include src="TaskSettings/ProjectsSettings.xhtml"/>
+            </ui:insert>
+        </p:tab>
+
+    </p:tabView>
+
+</ui:composition>

@@ -1,0 +1,714 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui">
+
+    <h:form id="candidatesViewForm">
+        <!--Header section -->
+        <p>
+            <p:link outcome="ViewTasks" value="#{msgs['TaskProperty.ViewTasks']}" styleClass="hrcrm-link"/>
+            <p:spacer width="5" height="1"/>
+            >
+            <p:spacer width="5" height="1"/>
+            <p:commandLink action="#{candidateBean.fiterViewTasks()}" value="#{msgs['TaskProperty.Candidate']}"
+                           styleClass="hrcrm-link"/>
+            <p:spacer width="5" height="1"/>
+            >
+            <p:spacer width="5" height="1"/>
+            <p:outputLabel value="#{candidateBean.task.id}"/>
+        </p>
+
+
+        <p:panelGrid style="width: 80em;table-layout:fixed;" styleClass="noBorder" layout="tabular">
+            <p:row>
+                <p:column style="height: 5em; width: 55em">
+                    <h4>
+                        <p:outputLabel
+                                value="#{candidateBean.task.id}: #{candidateBean.task.summary}"
+                                style="word-wrap:break-word;"
+                                rendered="#{!candidateBean.editMode}"/>
+                        <p:inputText id="summary"
+                                     required="true"
+                                     style="width:100%;"
+                                     rendered="#{candidateBean.editMode}"
+                                     requiredMessage="#{msgs['TaskValidation.emptyError']}"
+                                     value="#{candidateBean.task.summary}">
+                            <p:ajax update="summaryMessage" event="keyup"/>
+                            <f:validator validatorId="summaryValidator"/>
+                        </p:inputText>
+                    </h4>
+                </p:column>
+                <p:column>
+                    <p:message for="summary" id="summaryMessage" display="text"/>
+                </p:column>
+            </p:row>
+
+            <!-- Button Panel -->
+            <p:row>
+                <p:column>
+                    <p:panelGrid id="ButtonPanel" style="table-layout:fixed;" styleClass="noBorder">
+                        <p:row>
+                            <p:column style="width: 9em">
+                                <p:commandButton value="#{msgs['DialogButton.Edit']}"
+                                                 styleClass="hrcrm-button"
+                                                 actionListener="#{candidateBean.startEdit()}"
+                                                 update="candidatesViewForm"
+                                                 rendered="#{!candidateBean.editMode and !candidateBean.taskIsClosed}"/>
+                                <p:commandButton value="#{msgs['DialogButton.Update']}"
+                                                 rendered="#{candidateBean.editMode}"
+                                                 action="#{candidateBean.finishUpdate()}"
+                                                 update="candidatesViewForm"
+                                                 styleClass="hrcrm-button"/>
+                            </p:column>
+                            <p:column style="width: 9em">
+                                <p:commandButton value="#{msgs['DialogButton.Cancel']}"
+                                                 styleClass="hrcrm-button"
+                                                 type="button"
+                                                 onclick="PF('dlg1').show();"
+                                                 rendered="#{candidateBean.editMode}"/>
+                            </p:column>
+
+                            <p:column style="width: 13em">
+                                <p:commandButton value="#{msgs['DialogButton.StartProgress']}"
+                                                 styleClass="hrcrm-button-long"
+                                                 rendered="#{!candidateBean.taskIsClosed and !candidateBean.editMode}"/>
+                            </p:column>
+
+                            <p:column style="width: 13em">
+                                <p:commandButton value="#{msgs['DialogButton.LinkToVacancy']}"
+                                                 styleClass="hrcrm-button-long"
+                                                 oncomplete="PF('dlgLinkToVacancy').show();"
+                                                 update=":LinkToVacancyForm"
+                                                 rendered="#{!candidateBean.taskIsClosed and !candidateBean.editMode}"/>
+                            </p:column>
+
+                            <p:column style="width: 9em">
+                                <p:commandButton value="#{msgs['DialogButton.Resolve']}"
+                                                 styleClass="hrcrm-button"
+                                                 rendered="#{!candidateBean.taskIsClosed and !candidateBean.editMode}"
+                                                 update=":rezolutionCand"
+                                                 oncomplete="PF('rezol1').show();"/>
+                            </p:column>
+
+                            <p:column style="width: 9em">
+                                <p:commandButton value="#{msgs['DialogButton.Close']}"
+                                                 styleClass="hrcrm-button"
+                                                 action="#{candidateBean.closeTask()}"
+                                                 rendered="#{!candidateBean.taskIsClosed and !candidateBean.editMode}"
+                                                 update="candidatesViewForm"/>
+                                <p:commandButton value="#{msgs['DialogButton.Reopen']}"
+                                                 styleClass="hrcrm-button"
+                                                 actionListener="#{candidateBean.reopen}"
+                                                 update="candidatesViewForm"
+                                                 rendered="#{candidateBean.taskIsClosed}"/>
+                            </p:column>
+                        </p:row>
+                    </p:panelGrid>
+                </p:column>
+                <p:column/>
+            </p:row>
+
+
+            <p:row>
+                <p:column>
+                    <p:panelGrid id="leftPanelGrid" styleClass="noBorder"
+                                 style="width: 100%; table-layout:fixed;">
+
+
+                        <p:row>
+                            <p:column colspan="6">
+                                <h4 class="headerWithLine">
+                                    <p:outputLabel value="#{msgs['TaskProperty.Details']}"/>
+                                </h4>
+
+                            </p:column>
+                        </p:row>
+
+                        <!-- TASKTYPE + STATUS ROW -->
+                        <p:row>
+                            <p:column style="width: 10%">
+                                <p:outputLabel value="#{msgs['TaskProperty.TaskType']}:"/>
+                            </p:column>
+                            <p:column colspan="2" style="width: 40%">
+                                <p:outputLabel
+                                        value="#{msgs[candidateBean.task.getClass().getName()]}"/>
+                            </p:column>
+                            <p:column style="width: 10%">
+                                <p:outputLabel value="#{msgs['TaskProperty.Status']}:"/>
+                            </p:column>
+                            <p:column colspan="2" style="width: 40%">
+                                <p:outputLabel value="#{candidateBean.task.status.name}"/>
+                            </p:column>
+                        </p:row>
+
+                        <!-- PROJECT + RESOLUTION ROW -->
+                        <p:row>
+
+                            <p:column>
+                                <p:outputLabel value="#{msgs['TaskProperty.Project']}"/>
+                            </p:column>
+                            <p:column colspan="2">
+                                <p:selectOneMenu id="project"
+                                                 style="color: #000000;width:40%;"
+                                                 effectSpeed="fast"
+                                                 value="#{candidateBean.task.project}"
+                                                 rendered="#{candidateBean.editMode}"
+                                                 converter="#{projectConverter}"
+                                                 required="true"
+                                                 requiredMessage="#{msgs['TaskValidation.emptyError']}">
+                                    <f:selectItem/>
+                                    <f:selectItems value="#{candidateBean.projects}"
+                                                   var="project"
+                                                   itemValue="#{project}"
+                                                   itemLabel="#{project.name}"/>
+                                    <p:ajax update="projectMessage" event="change"/>
+                                </p:selectOneMenu>
+                                <p:outputLabel
+                                        value="#{candidateBean.task.project.name}"
+                                        style="word-wrap:break-word;"
+                                        rendered="#{!candidateBean.editMode}"/>
+                                <p:message id="projectMessage" for="project" display="text"/>
+                            </p:column>
+
+                            <p:column>
+                                <p:outputLabel value="#{msgs['TaskProperty.Resolution']}:"/>
+                            </p:column>
+                            <p:column colspan="2">
+                                <p:outputLabel
+                                        value="#{candidateBean.task.resolution.name}"/>
+                            </p:column>
+
+                        </p:row>
+
+                        <!-- POSITION + SOURCE ROW -->
+                        <p:row>
+
+                            <p:column>
+                                <p:outputLabel value="#{msgs['TaskProperty.Position']}"/>
+                            </p:column>
+                            <p:column colspan="2">
+                                <p:selectOneMenu id="position"
+                                                 style="color: #000000;width:40%;"
+                                                 effectSpeed="fast"
+                                                 value="#{candidateBean.task.position}"
+                                                 rendered="#{candidateBean.editMode}"
+                                                 converter="#{positionConverter}"
+                                                 required="true"
+                                                 requiredMessage="#{msgs['TaskValidation.emptyError']}">
+                                    <f:selectItem/>
+                                    <f:selectItems value="#{candidateBean.positions}"
+                                                   var="position"
+                                                   itemValue="#{position}"
+                                                   itemLabel="#{position.name}"/>
+                                    <p:ajax update="positionMessage" event="change"/>
+                                </p:selectOneMenu>
+                                <p:outputLabel
+                                        value="#{candidateBean.task.position.name}"
+                                        style="word-wrap:break-word;"
+                                        rendered="#{!candidateBean.editMode}"/>
+                                <p:message id="positionMessage" for="position" display="text"/>
+                            </p:column>
+
+                            <p:column>
+                                <p:outputLabel value="#{msgs['TaskProperty.Source']}"/>
+                            </p:column>
+                            <p:column colspan="2">
+                                <p:selectOneMenu id="source"
+                                                 style="color: #000000;width:40%;"
+                                                 effectSpeed="fast"
+                                                 value="#{candidateBean.task.source}"
+                                                 rendered="#{candidateBean.editMode}"
+                                                 required="true"
+                                                 requiredMessage="#{msgs['TaskValidation.emptyError']}">
+                                    <f:selectItem/>
+                                    <f:selectItems value="#{candidateBean.sources}"
+                                                   var="source"
+                                                   itemValue="#{source}"
+                                                   itemLabel="#{source.name}"/>
+                                    <p:ajax update="sourceMessage" event="change"/>
+                                </p:selectOneMenu>
+                                <p:outputLabel
+                                        value="#{candidateBean.task.source.name}"
+                                        style="word-wrap:break-word;"
+                                        rendered="#{!candidateBean.editMode}"/>
+                                <p:message id="sourceMessage" for="source" display="text"/>
+                            </p:column>
+
+                        </p:row>
+
+                        <!-- LEVEL ROW -->
+                        <p:row>
+
+                            <p:column>
+                                <p:outputLabel value="#{msgs['TaskProperty.CandidateLevel']}"/>
+                            </p:column>
+                            <p:column colspan="2">
+                                <p:selectOneMenu id="candidateLevel"
+                                                 style="color: #000000;width:40%;"
+                                                 effectSpeed="fast"
+                                                 value="#{candidateBean.task.candidateLevel}"
+                                                 rendered="#{candidateBean.editMode}"
+                                                 converter="#{candidateLevelConverter}"
+                                                 required="true"
+                                                 requiredMessage="#{msgs['TaskValidation.emptyError']}">
+                                    <f:selectItem/>
+                                    <f:selectItems value="#{candidateBean.candidateLevels}"
+                                                   var="candidateLevel"
+                                                   itemValue="#{candidateLevel}"
+                                                   itemLabel="#{candidateLevel.name}"/>
+                                    <p:ajax update="candidateLevelMessage" event="change"/>
+                                </p:selectOneMenu>
+                                <p:outputLabel
+                                        value="#{candidateBean.task.candidateLevel.name}"
+                                        style="word-wrap:break-word;"
+                                        rendered="#{!candidateBean.editMode}"/>
+                                <p:message id="candidateLevelMessage" for="candidateLevel" display="text"/>
+                            </p:column>
+                        </p:row>
+
+                        <!-- DESCRIPTION -->
+                        <p:row>
+                            <p:column colspan="6">
+                                <h4 class="headerWithLine">
+                                    <p:outputLabel value="#{msgs['TaskProperty.Description']}"/>
+                                </h4>
+                            </p:column>
+                        </p:row>
+
+                        <p:row>
+                            <p:column colspan="6">
+                                <p:message for="description" id="descriptionMessage" display="text"/>
+                                <p:outputLabel value="#{candidateBean.task.description}"
+                                               style="word-wrap:break-word; white-space: pre;"
+                                               rendered="#{!candidateBean.editMode}"/>
+                                <p:inputTextarea id="description" rows="9" cols="100"
+                                                 value="#{candidateBean.task.description}"
+                                                 styleClass="textareaCreate"
+                                                 style="width:100%;"
+                                                 rendered="#{candidateBean.editMode}"
+                                                 autoResize="false">
+                                    <p:ajax update="descriptionMessage" event="keyup"/>
+                                    <f:validator validatorId="descriptionValidator"/>
+                                </p:inputTextarea>
+                            </p:column>
+                        </p:row>
+
+                        <!-- linked vacancies -->
+                        <p:row>
+                            <p:column colspan="6">
+                                <p:accordionPanel>
+                                    <p:tab title="#{msgs['TaskProperty.Candidate.LinkedVacancies']}"
+                                           titleStyle="font-weight: bold;font-size: 18px;"
+                                           titleStyleClass="headerWithLine">
+
+                                        <p:dataTable id="alreadyLinkedRecruitments"
+                                                     var="vacancy"
+                                                     rowIndexVar="index"
+                                                     value="#{candidateBean.linkedRecruitments}"
+                                                     rendered="#{candidateBean.shownLinkedRecruitments}"
+                                                     styleClass="datatable-borders datatable-linked-vacancies">
+                                            <p:column headerText="#" style="width: 2em">
+                                                <h:outputText id="vacancyIndex" value="#{index+1}"/>
+                                            </p:column>
+                                            <p:column headerText="#{msgs['TaskProperty.Vacancy']}" style="width:5em">
+                                                <p:link id="vacancySummary" href="/browse/task-#{vacancy.id}"
+                                                        ajax="false" value="#{vacancy.summary}"/>
+                                                <p:tooltip for="vacancySummary" value="#{vacancy.summary}"
+                                                           styleClass="hover-over-cut"
+                                                           trackMouse="true"/>
+                                            </p:column>
+                                            <p:column headerText="#{msgs['TaskProperty.Status']}" style="width:4em">
+                                                <h:outputText id="vacancyStatus" value="#{vacancy.status.name}"/>
+                                            </p:column>
+                                            <p:column headerText="#{msgs['TaskProperty.Position']}" style="width:4em">
+                                                <h:outputText id="vacancyPosition" value="#{vacancy.position.name}"/>
+                                            </p:column>
+                                            <p:column headerText="#{msgs['TaskProperty.CandidateLevel']}"
+                                                      style="width:5em">
+                                                <h:outputText id="vacancyLevel" value="#{vacancy.candidateLevel.name}"/>
+                                            </p:column>
+                                        </p:dataTable>
+
+                                    </p:tab>
+                                </p:accordionPanel>
+                            </p:column>
+                        </p:row>
+                        <!-- _________________ -->
+
+                    </p:panelGrid>
+
+                    <!-- Comments pannel grid -->
+
+                    <p:panelGrid id="commentsPanelGrid"
+                                 styleClass="noBorder"
+                                 rendered="#{!candidateBean.editMode}"
+                                 style="width: 100%; table-layout:fixed;">
+
+                        <!-- Comments area -->
+
+                        <p:row>
+                            <p:column colspan="6">
+                                <h4 class="headerWithLine">
+                                    <p:outputLabel value="#{msgs['TaskProperty.Comments']}"/>
+                                </h4>
+                            </p:column>
+                        </p:row>
+
+                        <!-- Show task comments area -->
+
+                        <p:row>
+                            <p:column colspan="6">
+                                <ui:repeat value="#{candidateBean.comments}" var="comm">
+                                    <h:outputText
+                                            style="width:100%;  word-wrap: break-word; font-style: italic; font-weight: bold;"
+                                            value="#{comm.user.fullName}"/>
+                                    <h:outputText
+                                            style="width:100%;  word-wrap: break-word; font-style: italic; font-weight: bold;"
+                                            value=" added a comment - "/>
+                                    <h:outputText
+                                            style="width:100%;  word-wrap: break-word; font-style: italic; font-weight: bold;"
+                                            value="#{comm.date}">
+                                        <f:convertDateTime pattern="dd/MMM/yy HH:mm" locale="en"/>
+                                    </h:outputText>
+                                    <br/>
+                                    <h:outputText style="width:100%;  word-wrap: break-word;"
+                                                  value="#{comm.comment}"/>
+                                    <br/>
+                                    <br/>
+                                </ui:repeat>
+                            </p:column>
+                        </p:row>
+
+                        <p:row>
+                            <p:column colspan="6">
+                                <p:commandButton value="#{msgs['DialogButton.Comment']}"
+                                                 styleClass="hrcrm-button"
+                                                 actionListener="#{candidateBean.startAddComments()}"
+                                                 rendered="#{!candidateBean.enableAddComments}"
+                                                 update="candidatesViewForm"/>
+                            </p:column>
+                        </p:row>
+
+                        <p:row>
+                            <p:column colspan="6">
+                                <p:message for="comments" id="commentsMessage" display="text"/>
+                                <p:inputTextarea id="comments" rows="9" cols="100"
+                                                 styleClass="textareaCreate"
+                                                 style="width:100%;"
+                                                 autoResize="false"
+                                                 value="#{candidateBean.commentValue}"
+                                                 rendered="#{candidateBean.enableAddComments}">
+                                    <p:ajax update="commentsMessage" event="keyup"/>
+                                    <f:validator validatorId="commentsValidator"/>
+                                </p:inputTextarea>
+                            </p:column>
+                        </p:row>
+
+                        <p:row>
+                            <p:column colspan="6">
+                                <p:commandButton value="#{msgs['DialogButton.SaveComment']}"
+                                                 styleClass="hrcrm-button-long"
+                                                 rendered="#{candidateBean.enableAddComments}"
+                                                 actionListener="#{candidateBean.addCommentFromArea()}"
+                                                 update="candidatesViewForm"/>
+                                <p:spacer width="20"/>
+                                <p:commandButton value="#{msgs['DialogButton.Cancel']}"
+                                                 styleClass="hrcrm-button"
+                                                 rendered="#{candidateBean.enableAddComments}"
+                                                 actionListener="#{candidateBean.commentCancel()}"
+                                                 update="candidatesViewForm"
+                                                 immediate="true"/>
+                            </p:column>
+                        </p:row>
+
+                    </p:panelGrid>
+
+                    <!-- End Comments Pannel grid -->
+                </p:column>
+
+                <p:column style="vertical-align: top">
+                    <p:panelGrid id="rightPanelGrid" styleClass="noBorder"
+                                 style="width: 100%;">
+                        <p:row>
+                            <p:column colspan="4">
+                                <h4 class="headerWithLine">
+                                    <p:outputLabel value="#{msgs['TaskProperty.People']}"/>
+                                </h4>
+                            </p:column>
+                        </p:row>
+                        <p:row>
+                            <p:column>
+                                <p:outputLabel id="creator-label" value="#{msgs['TaskProperty.Creator']}:"/>
+                            </p:column>
+                            <p:column colspan="3">
+                                <p:outputLabel value="#{candidateBean.task.creator.fullName}"
+                                               style="word-wrap:break-word;"
+                                               rendered="#{!candidateBean.editMode}"/>
+                            </p:column>
+                        </p:row>
+
+                        <p:row>
+                            <p:column colspan="4">
+                                <h4 class="headerWithLine">
+                                    <p:outputLabel value="#{msgs['TaskProperty.Dates']}"/>
+                                </h4>
+                            </p:column>
+                        </p:row>
+
+                        <p:row>
+                            <p:column colspan="2">
+                                <p:outputLabel id="created" value="#{msgs['TaskProperty.CreationDate']}:"/>
+                            </p:column>
+                            <p:column colspan="2">
+                                <p:outputLabel value="#{candidateBean.task.creationDate}">
+                                    <f:convertDateTime pattern="MM/dd/yyyy"/>
+                                </p:outputLabel>
+                            </p:column>
+                        </p:row>
+                        <p:row>
+                            <p:column colspan="2">
+                                <p:outputLabel id="updeted"
+                                               value="#{msgs['TaskProperty.LastUpdatedDate']}:"/>
+                            </p:column>
+                            <p:column colspan="2">
+                                <p:outputLabel id="updated"
+                                               value="#{candidateBean.task.updateDate}">
+                                    <f:convertDateTime pattern="MM/dd/yyyy"/>
+                                </p:outputLabel>
+                            </p:column>
+                        </p:row>
+                        <p:row>
+                            <p:column colspan="2">
+                                <p:outputLabel id="closed"
+                                               value="#{msgs['TaskProperty.ClosedDate']}:"/>
+                            </p:column>
+                            <p:column colspan="2">
+                                <p:outputLabel value="#{candidateBean.task.closedDate}">
+                                    <f:convertDateTime pattern="MM/dd/yyyy"/>
+                                </p:outputLabel>
+                            </p:column>
+                        </p:row>
+
+                    </p:panelGrid>
+                </p:column>
+            </p:row>
+        </p:panelGrid>
+
+    </h:form>
+
+    <p:confirmDialog message="#{msgs['Popup.CancelEdit']}"
+                     widgetVar="dlg1" closable="false" severity="alert">
+        <h:panelGroup layout="block" style="text-align: right">
+            <h:form>
+                <p:commandButton value="#{msgs['DialogButton.Ok']}"
+                                 styleClass="hrcrm-button"
+                                 oncomplete="PF('dlg1').hide();"
+                                 actionListener="#{candidateBean.cancelEdit()}"
+                                 update=":candidatesViewForm"/>
+                <p:spacer width="20"/>
+
+                <p:commandButton value="#{msgs['DialogButton.Cancel']}" type="button"
+                                 styleClass="hrcrm-button" onclick="PF('dlg1').hide();"/>
+            </h:form>
+        </h:panelGroup>
+    </p:confirmDialog>
+
+    <!-- Resolution Issue popup menu -->
+
+    <p:confirmDialog id="rezolutionCand"
+                     widgetVar="rezol1"
+                     closable="false"
+                     style="width: 650px!important;">
+        <f:facet name="header">
+            <p:panelGrid styleClass="noBorder" style="width: 620px">
+
+                <!-- Window header -->
+
+                <p:row>
+                    <p:column>
+                        <p:outputLabel style="font-size:14px;" value="#{msgs['Popup.SetResolution']}"/>
+                    </p:column>
+                    <p:column style="text-align:right; vertical-align:middle;">
+                        <p:commandLink class="hrcrm-close" onclick="PF('rezol2').show();">
+                            <span class="ui-icon ui-icon-closethick"></span>
+                        </p:commandLink>
+                    </p:column>
+                </p:row>
+            </p:panelGrid>
+        </f:facet>
+        <f:facet name="message">
+            <h:form>
+                <p:panelGrid styleClass="noBorder" style="height:5em;
+                vertical-align:top;
+                width: 600px!important;">
+
+                    <!-- Resolution row -->
+
+                    <p:row>
+                        <p:column>
+                            <p:outputLabel style="width:120px!important; margin-top: 8px; margin-bottom: 8px"
+                                           value="#{msgs['TaskProperty.SetResolution']}:"/>
+                        </p:column>
+                        <p:column style="width:18em;">
+                            <p:selectOneMenu id="setrresolution"
+                                             value="#{candidateBean.resolutionSet}"
+                                             effectSpeed="fast"
+                                             required="true"
+                                             requiredMessage="#{msgs['TaskValidation.emptyError']}"
+                                             converter="#{resolutionConverter}"
+                                             style="width:226px;">
+                                <f:selectItem itemDisabled="true"/>
+                                <f:selectItems
+                                        value="#{candidateBean.resolutionValue}"
+                                        var="rezol"
+                                        itemLabel="#{rezol.name}"
+                                        itemValue="#{rezol}"/>
+                                <p:ajax update="setrresolutionMessage" event="change"/>
+                            </p:selectOneMenu>
+                            <p:message id="setrresolutionMessage" for="setrresolution" display="text"/>
+                        </p:column>
+                        <p:column style="width:9em;">
+                        </p:column>
+                    </p:row>
+
+                    <!-- Comment row -->
+
+                    <p:row>
+                        <p:column style="vertical-align: top;">
+                            <p:outputLabel style="width:120px;margin-top: 8px; margin-bottom: 8px"
+                                           value="#{msgs['TaskProperty.Comment']}:"/>
+                        </p:column>
+                        <p:column style="width:18em;">
+                            <p:message for="commentResolveIssue" id="commentsMessageResolveIssue" display="text"/>
+                            <p:inputTextarea id="commentResolveIssue" rows="9" cols="100"
+                                             value="#{candidateBean.commentValue}"
+                                             styleClass="textareaCreate"
+                                             style="width:460px; height:150px"
+                                             autoResize="false">
+                                <p:ajax update="commentsMessageResolveIssue" event="keyup"/>
+                                <f:validator validatorId="commentsValidator"/>
+                            </p:inputTextarea>
+                        </p:column>
+                    </p:row>
+
+                </p:panelGrid>
+                <h:panelGroup layout="block" style="text-align: right; padding-top: 10px; padding-right: 20px;">
+                    <p:commandButton value="#{msgs['DialogButton.Resolve']}"
+                                     styleClass="hrcrm-button"
+                                     action="#{candidateBean.resolutionUpdate()}"
+                                     oncomplete="if (!args.validationFailed) PF('rezol1').hide();"
+                                     update=":candidatesViewForm setrresolutionMessage">
+                    </p:commandButton>
+                    <p:spacer width="20"/>
+                    <p:commandButton value="#{msgs['DialogButton.Cancel']}" type="button"
+                                     styleClass="hrcrm-button"
+                                     onclick="PF('rezol2').show();"/>
+                </h:panelGroup>
+            </h:form>
+        </f:facet>
+    </p:confirmDialog>
+
+    <p:confirmDialog message="#{msgs['Popup.CancelSetResolution']}"
+                     widgetVar="rezol2" closable="false" severity="alert">
+        <h:panelGroup layout="block" style="text-align: right">
+            <h:form>
+                <p:commandButton value="#{msgs['DialogButton.Ok']}"
+                                 styleClass="hrcrm-button"
+                                 action="#{candidateBean.resetSets()}"
+                                 onclick="PF('rezol2').hide();"
+                                 oncomplete="PF('rezol1').hide();"/>
+                <p:spacer width="20"/>
+
+                <p:commandButton value="#{msgs['DialogButton.Cancel']}" type="button"
+                                 styleClass="hrcrm-button" onclick="PF('rezol2').hide();"/>
+            </h:form>
+        </h:panelGroup>
+    </p:confirmDialog>
+
+    <p:dialog header="Link vacancies for candidate: ID #{candidateBean.task.id}"
+              widgetVar="dlgLinkToVacancy"
+              modal="true"
+              height="375">
+        <h:form id="LinkToVacancyForm">
+            <p:dataTable
+                    id="activeRecruitmentsTable"
+                    value="#{candidateBean.activeRecruitment}"
+                    var="Recruitment"
+                    scrollable="true"
+                    scrollHeight="260"
+                    rowKey="#{Recruitment.id}"
+                    selection="#{candidateBean.selectedRecruitments}"
+                    widgetVar="activeRecruitmentsTable"
+                    rowSelectMode="checkbox"
+                    emptyMessage="No Active Vacancies">
+                <p:column selectionMode="multiple"
+                          style="width:40px;text-align:center">
+                </p:column>
+                <p:column headerText="ID"
+                          style="width: 5em;"
+                          filterBy="#{Recruitment.id}"
+                          sortBy="#{Recruitment.id}"
+                          filterStyle="width: 100%">
+                    <h:outputText value="#{Recruitment.id}"/>
+                </p:column>
+                <p:column headerText="Summary"
+                          filterBy="#{Recruitment.summary}"
+                          sortBy="#{Recruitment.summary}"
+                          filterMatchMode="contains"
+                          filterStyle="width: 100%">
+                    <h:outputText value="#{Recruitment.summary}"/>
+                </p:column>
+                <p:column headerText="Position"
+                          filterBy="#{Recruitment.position.name}"
+                          sortBy="#{Recruitment.position.name}"
+                          filterMatchMode="in">
+                    <f:facet name="filter">
+                        <p:selectCheckboxMenu id="filterPositionCandidate"
+                                              label=""
+                                              widgetVar="filterPositionCandidate"
+                                              onchange="PF('activeRecruitmentsTable').filter()"
+                                              style="width:100%;"
+                                              panelStyle="max-width: 20em;position: fixed"
+                                              panelStyleClass="without-selectall">
+                            <f:selectItems value="#{candidateBean.usedRecruitmentPositions}"/>
+                            <p:ajax listener="#{candidateBean.updateLabel('filterPositionCandidate')}"
+                                    update="filterPositionCandidate"/>
+                            <p:ajax onsuccess="PF('filterPositionCandidate').show()"/>
+                        </p:selectCheckboxMenu>
+                    </f:facet>
+                    <h:outputText value="#{Recruitment.position.name}"/>
+                </p:column>
+                <p:column headerText="Level"
+                          filterBy="#{Recruitment.candidateLevel.name}"
+                          sortBy="#{Recruitment.candidateLevel.name}"
+                          filterMatchMode="in">
+                    <f:facet name="filter">
+                        <p:selectCheckboxMenu id="filterLevelCandidate"
+                                              label=""
+                                              widgetVar="filterLevelCandidate"
+                                              onchange="PF('activeRecruitmentsTable').filter()"
+                                              style="width:100%;"
+                                              panelStyle="max-width: 20em;position: fixed"
+                                              panelStyleClass="without-selectall">
+                            <f:selectItems value="#{candidateBean.usedRecruitmentLevels}"/>
+                            <p:ajax listener="#{candidateBean.updateLabel('filterLevelCandidate')}"
+                                    update="filterLevelCandidate"/>
+                            <p:ajax onsuccess="PF('filterLevelCandidate').show()"/>
+                        </p:selectCheckboxMenu>
+                    </f:facet>
+                    <h:outputText value="#{Recruitment.candidateLevel.name}"/>
+                </p:column>
+            </p:dataTable>
+            <p:commandButton value="Cancel"
+                             oncomplete="PF('dlgLinkToVacancy').hide();"
+                             style="float: right; margin: 10px"
+                             actionListener="#{candidateBean.init}"/>
+            <p:commandButton value="Link"
+                             actionListener="#{candidateBean.onLinkClicked}"
+                             onclick="PF('dlgLinkToVacancy').hide();"
+                             update=":candidatesViewForm"
+                             style="float: right; margin: 10px"/>
+        </h:form>
+    </p:dialog>
+</ui:composition>

@@ -15,5 +15,88 @@
             <var>msgs</var>
         </resource-bundle>
     </application>
+    <navigation-rule>
+        <from-view-id>*</from-view-id>
+        <!--<navigation-case>-->
+        <!--<from-outcome>correct</from-outcome>-->
+        <!--<to-view-id>/secure/ViewTasks.xhtml</to-view-id>-->
+        <!--<redirect/>-->
+        <!--</navigation-case>-->
+        <navigation-case>
+            <from-outcome>logout</from-outcome>
+            <to-view-id>/login/Login.xhtml</to-view-id>
+            <redirect/>
+        </navigation-case>
+    </navigation-rule>
+
+    <navigation-rule>
+        <from-view-id>*</from-view-id>
+        <navigation-case>
+            <from-outcome>ViewTasks</from-outcome>
+            <to-view-id>/ViewTasks.xhtml</to-view-id>
+            <redirect/>
+        </navigation-case>
+    </navigation-rule>
+    <navigation-rule>
+        <from-view-id>*</from-view-id>
+        <navigation-case>
+            <from-outcome>createTask</from-outcome>
+            <to-view-id>/TaskTypeSelection.xhtml</to-view-id>
+            <redirect/>
+        </navigation-case>
+    </navigation-rule>
+    <navigation-rule>
+        <from-view-id>/TaskTypeSelection.xhtml</from-view-id>
+        <navigation-case>
+            <from-outcome>createTask</from-outcome>
+            <if>#{taskTypeSelectionBean.taskType eq 'com.eisgroup.hrcrm.model.ODSInternal'}</if>
+            <to-view-id>/CreateOdsInternal.xhtml</to-view-id>
+            <redirect/>
+        </navigation-case>
+        <navigation-case>
+            <from-outcome>createTask</from-outcome>
+            <if>#{taskTypeSelectionBean.taskType eq 'com.eisgroup.hrcrm.model.Candidate'}</if>
+            <to-view-id>/CreateCandidates.xhtml</to-view-id>
+            <redirect/>
+        </navigation-case>
+        <navigation-case>
+            <from-outcome>createTask</from-outcome>
+            <if>#{taskTypeSelectionBean.taskType eq 'com.eisgroup.hrcrm.model.Marketing'}</if>
+            <to-view-id>/CreateMarketing.xhtml</to-view-id>
+            <redirect/>
+        </navigation-case>
+        <navigation-case>
+            <from-outcome>createTask</from-outcome>
+            <if>#{taskTypeSelectionBean.taskType eq 'com.eisgroup.hrcrm.model.PerformanceAppraisal'}</if>
+            <to-view-id>/CreatePerformanceAppraisals.xhtml</to-view-id>
+            <redirect/>
+        </navigation-case>
+        <navigation-case>
+            <from-outcome>createTask</from-outcome>
+            <if>#{taskTypeSelectionBean.taskType eq 'com.eisgroup.hrcrm.model.Recruitment'}</if>
+            <to-view-id>/CreateRecruitment.xhtml</to-view-id>
+            <redirect/>
+        </navigation-case>
+    </navigation-rule>
+    <navigation-rule>
+        <from-view-id>*</from-view-id>
+        <navigation-case>
+            <from-outcome>userInfo</from-outcome>
+            <to-view-id>/admin/AdminApplication.xhtml</to-view-id>
+            <redirect/>
+        </navigation-case>
+    </navigation-rule>
+    <navigation-rule>
+        <navigation-case>
+            <from-action>#{loginBean.logout}</from-action>
+            <from-outcome>loggedOut</from-outcome>
+            <to-view-id>/login/Login.xhtml</to-view-id>
+            <redirect/>
+        </navigation-case>
+    </navigation-rule>
+
+    <lifecycle>
+        <phase-listener>com.eisgroup.hrcrm.ui.beans.LoginErrorPhaseListener</phase-listener>
+    </lifecycle>
 
 </faces-config>

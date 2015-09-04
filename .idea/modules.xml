@@ -3,6 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/HRCRM.iml" filepath="$PROJECT_DIR$/HRCRM.iml" />
+      <module fileurl="file://$PROJECT_DIR$/service/HRCRM-service.iml" filepath="$PROJECT_DIR$/service/HRCRM-service.iml" />
       <module fileurl="file://$PROJECT_DIR$/dao/dao.iml" filepath="$PROJECT_DIR$/dao/dao.iml" />
       <module fileurl="file://$PROJECT_DIR$/ui/ui.iml" filepath="$PROJECT_DIR$/ui/ui.iml" />
     </modules>

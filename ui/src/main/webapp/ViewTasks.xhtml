@@ -1,0 +1,446 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:c="http://java.sun.com/jsp/jstl/core"
+      xmlns:p="http://primefaces.org/ui" xmlns:pe="http://java.sun.com/jsf/core">
+<h:body>
+    <ui:composition template="templates/layout.xhtml">
+        <ui:define name="content">
+            <h:form>
+                <p:commandButton action="createTask"
+                                 ajax="false"
+                                 value="#{msgs['ViewTasks.CreateNewTask']}"
+                                 styleClass="hrcrm-button"
+                                 style="width: auto"/>
+            </h:form>
+            <hr style="background-color: #000000;height: 1px;width: 92.6em"/>
+            <h:form id="taskTableForm">
+                <ui:fragment rendered="#{!viewTasksBean.tasksExist}">
+                    <p:outputLabel rendered="true" value="#{msgs['ViewTasks.emptyList']}"/>
+                </ui:fragment>
+
+                <ui:fragment rendered="#{viewTasksBean.tasksExist}">
+                    <p:selectBooleanCheckbox id="taskActiveCB" value="#{viewTasksBean.showOnlyActiveTasks}">
+                        <p:ajax listener="#{viewTasksBean.showOnlyActiveTaskListener}"
+                                update="taskTableForm, :messageForm"/>
+                    </p:selectBooleanCheckbox>
+                    <h:outputText style="margin-left:10px" value="#{msgs['ViewTasks.showOnlyActiveTasks']}"/>
+                    <br/>
+                    <br/>
+                    <hr style="background-color: #000000;height: 1px;width: 92.6em"/>
+                </ui:fragment>
+
+                <p/>
+
+                <p:dataTable id="taskTable"
+                             first="#{viewTasksBean.firstRow}"
+                             paginator="true"
+                             rows="#{viewTasksBean.rowsPerPage}"
+                             paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+                             currentPageReportTemplate="Pages ({currentPage} of {totalPages})"
+                             rowsPerPageTemplate="10,25,50"
+                             paginatorPosition="bottom"
+                             pageLinks="10"
+                             dblClickSelect="true"
+                             paginatorAlwaysVisible="true"
+                             selectionMode="single"
+                             lazy="true"
+                             var="task"
+                             value="#{viewTasksBean.dataModel}"
+                             rendered="#{viewTasksBean.tasksExist}"
+                             styleClass="borderless"
+                             sortBy="#{task.id}"
+                             sortOrder="#{viewTasksBean.sortOrder}"
+                             emptyMessage=""
+                             widgetVar="tasksTable">
+                    <p:ajax event="page" listener="#{viewTasksBean.onPageChange}"/>
+                    <p:ajax event="sort" listener="#{viewTasksBean.onPageSort}"/>
+                    <p:ajax event="filter" listener="#{viewTasksBean.onPageFilter}" oncomplete="fnFilterColumn()"
+                            update=":taskTableForm:taskActiveCB"/>
+                    <p:column headerText="ID"
+                              sortBy="#{task.id}"
+                              style="width: 5em;"
+                              filterBy="#{task.id}"
+                            >
+                        <f:facet name="filter">
+                            <p:inputText id="idFilter"
+                                         style="width:100%;"
+                                         styleClass="filterInput"
+                                         maxlength="19">
+                                <f:validateRegex pattern="^[0-9]+$"/>
+                                <p:ajax event="keyup" onsuccess="PF('tasksTable').filter()"/>
+                            </p:inputText>
+                        </f:facet>
+                        <p:link id="taskId" href="/browse/task-#{task.id}" ajax="false" value="#{task.id}"/>
+                    </p:column>
+
+                    <p:column headerText="#{msgs['TaskProperty.Summary']}"
+                              style="width: 10em;"
+                              sortBy="#{task.summary}"
+                              filterBy="#{task.summary}"
+                            >
+                        <f:facet name="filter">
+                            <p:inputText id="summaryFilter"
+                                         style="width:100%;"
+                                         maxlength="2048">
+                                <p:ajax event="keyup" onsuccess="PF('tasksTable').filter();"/>
+                            </p:inputText>
+                        </f:facet>
+                        <h:outputText id="summary" value="#{task.summary}"
+                                      title="#{task.summary}"/>
+                        <p:tooltip for="summary" styleClass="hover-over-cut" trackMouse="true"/>
+                    </p:column>
+
+                    <p:column headerText="#{msgs['TaskProperty.TaskType']}"
+                              style="width: 12em;"
+                              sortBy="#{TASK_TYPE}"
+                              filterBy="#{TASK_TYPE}"
+                              filterMatchMode="exact">
+                        <f:facet name="filter">
+                            <p:selectCheckboxMenu widgetVar="taskTypeFilter" id="taskTypeFilter"
+                                                  onchange="PF('tasksTable').filter()"
+                                                  label="" panelStyleClass="without-selectall"
+                                                  style="width: 100%">
+                                <f:selectItem itemLabel="#{msgs['TaskProperty.blank']}" itemDisabled="true"/>
+                                <f:selectItem itemLabel="#{msgs['TaskProperty.Marketing']}" itemValue="Marketing"/>
+                                <f:selectItem itemLabel="#{msgs['TaskProperty.ODSInternal']}" itemValue="ODSInternal"/>
+                                <f:selectItem itemLabel="#{msgs['TaskProperty.PerformanceAppraisal']}"
+                                              itemValue="PerformanceAppraisal"/>
+                                <f:selectItem itemLabel="#{msgs['TaskProperty.Recruitment']}" itemValue="Recruitment"/>
+                                <f:selectItem itemLabel="#{msgs['TaskProperty.Candidate']}" itemValue="Candidate"/>
+                                <p:ajax
+                                        listener="#{viewTasksBean.updateLabel('taskTypeFilter')}"
+                                        update="taskTypeFilter"/>
+                                <p:ajax onsuccess="PF('taskTypeFilter').show()"/>
+                            </p:selectCheckboxMenu>
+                        </f:facet>
+                        <h:outputText value="#{msgs[task.getClass().getName()]}"/>
+                    </p:column>
+
+                    <p:column headerText="#{msgs['TaskProperty.Priority']}"
+                              style="width: 7.5em;"
+                              sortBy="#{task.priority}"
+                              filterBy="#{task.priority}">
+                        <f:facet name="filter">
+                            <p:selectCheckboxMenu id="priorityFilter" onchange="PF('tasksTable').filter()"
+                                                  label="" panelStyleClass="without-selectall"
+                                                  widgetVar="priorityFilter"
+                                                  style="width: 100%">
+                                <f:selectItem itemLabel="#{msgs['TaskProperty.blank']}" itemDisabled="true"/>
+                                <f:selectItem itemLabel="High" itemValue="HIGH"/>
+                                <f:selectItem itemLabel="Medium" itemValue="MEDIUM"/>
+                                <f:selectItem itemLabel="Low" itemValue="LOW"/>
+                                <f:selectItem itemLabel="Critical" itemValue="CRITICAL"/>
+                                <p:ajax
+                                        listener="#{viewTasksBean.updateLabel('priorityFilter')}"
+                                        update="priorityFilter"/>
+                                <p:ajax onsuccess="PF('priorityFilter').show()"/>
+                            </p:selectCheckboxMenu>
+                        </f:facet>
+                        <h:outputText value="#{task.priority.name}"/>
+                    </p:column>
+
+                    <p:column headerText="#{msgs['TaskProperty.Status']}"
+                              style="width: 7.5em;"
+                              sortBy="#{task.status}"
+                              filterBy="#{task.status}">
+                        <f:facet name="filter">
+                            <p:selectCheckboxMenu onchange="PF('tasksTable').filter()"
+                                                  id="statusFilter"
+                                                  label=""
+                                                  widgetVar="statusFilter"
+                                                  panelStyleClass="without-selectall"
+                                                  style="width: 100%">
+                                <f:selectItem itemLabel="#{msgs['TaskProperty.blank']}" itemDisabled="true"/>
+                                <f:selectItem itemLabel="Open" itemValue="OPEN"/>
+                                <f:selectItem itemLabel="Closed" itemValue="CLOSED"/>
+                                <f:selectItem itemLabel="In Progress" itemValue="IN_PROGRESS"/>
+                                <f:selectItem itemLabel="Resolved" itemValue="RESOLVED"/>
+                                <f:selectItem itemLabel="Reopened" itemValue="REOPENED"/>
+                                <p:ajax
+                                        listener="#{viewTasksBean.updateLabel('statusFilter')}"
+                                        update="statusFilter"/>
+                                <p:ajax onsuccess="PF('statusFilter').show()"/>
+                            </p:selectCheckboxMenu>
+                        </f:facet>
+                        <h:outputText value="#{task.status.name}"/>
+                    </p:column>
+
+                    <p:column headerText="#{msgs['TaskProperty.Complexity']}" style="width: 7.5em;"
+                              sortBy="#{task.complexity.name}"
+                              filterBy="#{task.complexity}">
+                        <f:facet name="filter">
+                            <p:selectCheckboxMenu id="complexityFilter" onchange="PF('tasksTable').filter()"
+                                                  label="" panelStyleClass="without-selectall"
+                                                  style="width: 100%;"
+                                                  widgetVar="complexityFilter"
+                                                  panelStyle="max-width: 20em">
+                                <f:selectItem itemLabel="#{msgs['TaskProperty.blank']}" itemDisabled="true"/>
+                                <f:selectItems value="#{viewTasksBean.usedComplexities}"
+                                               var="complexity"
+                                               itemValue="#{complexity}"
+                                               itemLabel="#{complexity}"/>
+                                <p:ajax
+                                        listener="#{viewTasksBean.updateLabel('complexityFilter')}"
+                                        update="complexityFilter"/>
+                                <p:ajax onsuccess="PF('complexityFilter').show()"/>
+                            </p:selectCheckboxMenu>
+                        </f:facet>
+                        <h:outputText value="#{task.complexity.name}"/>
+                    </p:column>
+
+                    <p:column headerText="#{msgs['TaskProperty.Creator']}"
+                              style="width: 9em;"
+                              sortBy="#{creator}"
+                              filterBy="#{creator}"
+                            >
+                        <f:facet name="filter">
+                            <p:inputText id="creatorFilter"
+                                         style="width:100%;"
+                                         disabled="true"
+                                         maxlength="100">
+                                <p:ajax event="keyup" onsuccess="PF('tasksTable').filter();"/>
+                            </p:inputText>
+                        </f:facet>
+                        <h:outputText id="creator" value="#{task.creator.getFullName()}"
+                                      title="#{task.creator.getFullName()}"/>
+                        <p:tooltip for="creator" styleClass="hover-over-cut" trackMouse="true"/>
+                    </p:column>
+
+                    <p:column headerText="#{msgs['TaskProperty.Assignee']}"
+                              style="width: 9em;"
+                              sortBy="#{assignee}"
+                              filterBy="#{assignee}"
+                            >
+                        <f:facet name="filter">
+                            <p:inputText id="assigneeFilter"
+                                         style="width:100%;"
+                                         disabled="true"
+                                         maxlength="100">
+                                <p:ajax event="keyup" onsuccess="PF('tasksTable').filter();"/>
+                            </p:inputText>
+                        </f:facet>
+                        <h:outputText id="assignee" value="#{task.assignee.getFullName()}"
+                                      title="#{task.assignee.getFullName()}"/>
+                        <p:tooltip for="assignee" styleClass="hover-over-cut" trackMouse="true"/>
+                    </p:column>
+
+                    <p:column headerText="#{msgs['TaskProperty.CreationDate']}"
+                              style="width: 8.5em;"
+                              sortBy="#{task.creationDate}"
+                              filterBy="#{task.creationDate}">
+                        <h:outputText value="#{task.creationDate}">
+                            <f:convertDateTime pattern="MM/dd/yyyy"/>
+                        </h:outputText>
+                        <f:facet name="filter">
+                            <p:calendar effectSpeed="fast"
+                                        required="false"
+                                        styleClass="filterInput"
+                                        id="creationDateFilter"
+                                        placeholder="MM/DD/YYYY"
+                                        pattern="MM/dd/yyyy"
+                                        mask="99/99/9999">
+                                <p:ajax event="dateSelect"
+                                        onsuccess="PF('tasksTable').filter()"
+                                        update="taskTable:creationDateFilter"/>
+                                <p:ajax event="change"
+                                        onsuccess="PF('tasksTable').filter()"
+                                        update="taskTable:creationDateFilter"/>
+                                <p:overlayPanel for="creationDateFilter"
+                                                id="creationDateFilterTooltip"
+                                                showEvent="mouseover"
+                                                hideEvent="mouseout"
+                                                rendered="#{!viewTasksBean.isDateValid('creationDateFilter')}"
+                                                at="left top" my="left bottom">
+                                    <p:outputLabel value="#{msgs['TaskValidation.dateError']}"/>
+                                </p:overlayPanel>
+                            </p:calendar>
+
+
+                        </f:facet>
+                    </p:column>
+
+                    <p:column headerText="#{msgs['TaskProperty.DueDate']}"
+                              style="width: 8.5em;"
+                              sortBy="#{task.dueDate}"
+                              filterBy="#{task.dueDate}">
+                        <h:outputText value="#{task.dueDate}">
+                            <f:convertDateTime pattern="MM/dd/yyyy"/>
+                        </h:outputText>
+                        <f:facet name="filter">
+                            <p:calendar effectSpeed="fast"
+                                        required="false"
+                                        styleClass="filterInput"
+                                        id="dueDateFilter"
+                                        placeholder="MM/DD/YYYY"
+                                        pattern="MM/dd/yyyy"
+                                        mask="99/99/9999">
+                                <p:ajax event="dateSelect"
+                                        onsuccess="PF('tasksTable').filter()"
+                                        update="taskTable:dueDateFilter"/>
+                                <p:ajax event="change"
+                                        onsuccess="PF('tasksTable').filter()"
+                                        update="taskTable:dueDateFilter"/>
+                                <p:overlayPanel for="dueDateFilter"
+                                                id="dueDateFilterTooltip"
+                                                showEvent="mouseover"
+                                                hideEvent="mouseout"
+                                                rendered="#{!viewTasksBean.isDateValid('dueDateFilter')}"
+                                                at="left top" my="left bottom">
+                                    <p:outputLabel value="#{msgs['TaskValidation.dateError']}"/>
+                                </p:overlayPanel>
+                            </p:calendar>
+
+                        </f:facet>
+                    </p:column>
+                </p:dataTable>
+                <script type="text/javascript">
+                    PrimeFaces.widget.DataTable.prototype.bindSortEvents = function () {
+                        var $this = this;
+                        this.sortableColumns = this.thead.find('> tr > th.ui-sortable-column');
+                        this.sortableColumns.attr('tabindex', '0');
+
+                        if (this.cfg.multiSort) {
+                            this.sortMeta = [];
+                        }
+
+                        for (var i = 0; i &lt; this.sortableColumns.length; i++) {
+                            var columnHeader = this.sortableColumns.eq(i),
+                                    sortIcon = columnHeader.children('span.ui-sortable-column-icon'),
+                                    sortOrder = null;
+
+                            if (columnHeader.hasClass('ui-state-active')) {
+                                if (sortIcon.hasClass('ui-icon-triangle-1-n'))
+                                    sortOrder = this.SORT_ORDER.ASCENDING;
+                                else
+                                    sortOrder = this.SORT_ORDER.DESCENDING;
+
+                                if ($this.cfg.multiSort) {
+                                    $this.addSortMeta({
+                                        col: columnHeader.attr('id'),
+                                        order: sortOrder
+                                    });
+                                }
+                            }
+                            else {
+                                sortOrder = this.SORT_ORDER.UNSORTED;
+                            }
+
+                            columnHeader.data('sortorder', sortOrder);
+                        }
+
+                        this.sortableColumns.on('mouseenter.dataTable', function () {
+                            var column = $(this);
+
+                            if (!column.hasClass('ui-state-active'))
+                                column.addClass('ui-state-hover');
+                        })
+                                .on('mouseleave.dataTable', function () {
+                                    var column = $(this);
+
+                                    if (!column.hasClass('ui-state-active'))
+                                        column.removeClass('ui-state-hover');
+                                })
+                                .on('blur.dataTable', function () {
+                                    $(this).removeClass('ui-state-focus');
+                                })
+                                .on('focus.dataTable', function () {
+                                    $(this).addClass('ui-state-focus');
+                                })
+                                .on('keydown.dataTable', function (e) {
+                                    var key = e.which,
+                                            keyCode = $.ui.keyCode;
+
+                                    if ((key === keyCode.ENTER || key === keyCode.NUMPAD_ENTER) &amp;&amp; $(e.target).is(':not(:input)')) {
+                                        $(this).trigger('click.dataTable', (e.metaKey || e.ctrlKey));
+                                        e.preventDefault();
+                                    }
+                                })
+                                .on('click.dataTable', function (e, metaKeyOn) {
+                                    if (!$this.shouldSort(e, this)) {
+                                        return;
+                                    }
+
+                                    PrimeFaces.clearSelection();
+
+                                    var columnHeader = $(this),
+                                            sortOrderData = columnHeader.data('sortorder');
+                                    if (sortOrderData === $this.SORT_ORDER.UNSORTED) {
+                                        for (var i = 0; i &lt; $this.sortableColumns.length; i++) {
+                                            var searchColumnHeader = $this.sortableColumns.eq(i),
+                                                    sortIcon = searchColumnHeader.children('span.ui-sortable-column-icon'),
+                                                    sortOrder = null;
+
+                                            if (sortIcon.hasClass('ui-icon-triangle-1-n')) {
+                                                sortOrder = $this.SORT_ORDER.ASCENDING;
+                                                break;
+                                            }
+                                            if (sortIcon.hasClass('ui-icon-triangle-1-s')) {
+                                                sortOrder = $this.SORT_ORDER.DESCENDING;
+                                                break;
+                                            }
+                                        }
+                                    } else {
+                                        sortOrder = -1 * sortOrderData
+                                    }
+//                                            sortOrder = (sortOrderData === $this.SORT_ORDER.UNSORTED) ? $this.SORT_ORDER.ASCENDING : -1 * sortOrderData;
+
+                                    metaKey = e.metaKey || e.ctrlKey || metaKeyOn;
+
+                                    if ($this.cfg.multiSort) {
+                                        if (metaKey) {
+                                            $this.addSortMeta({
+                                                col: columnHeader.attr('id'),
+                                                order: sortOrder
+                                            });
+                                            $this.sort(columnHeader, sortOrder, true);
+                                        }
+                                        else {
+                                            $this.sortMeta = [];
+                                            $this.addSortMeta({
+                                                col: columnHeader.attr('id'),
+                                                order: sortOrder
+                                            });
+                                            $this.sort(columnHeader, sortOrder);
+                                        }
+                                    }
+                                    else {
+                                        $this.sort(columnHeader, sortOrder);
+                                    }
+
+                                });
+                    };
+                    function fnFilterColumn() {
+                        if ($('.ui-datatable-data').find('.ui-datatable-empty-message').length == 1) {
+                            $('.ui-paginator-bottom').hide();
+                        } else {
+                            $('.ui-paginator-bottom').show();
+                        }
+                    }
+                    $(document).ready(function () {
+                        if ($('.ui-datatable-data').find('.ui-datatable-empty-message').length == 1) {
+                            $('.ui-paginator-bottom').hide();
+                        } else {
+                            $('.ui-paginator-bottom').show();
+                        }
+                    });
+                </script>
+            </h:form>
+            <h:form id="messageForm">
+                <ui:fragment
+                        rendered="#{empty viewTasksBean.dataModel.wrappedData and viewTasksBean.showOnlyActiveTasks and viewTasksBean.tasksExist and !viewTasksBean.isTableFiltered}">
+                    <p:outputLabel value="#{msgs['ViewTasks.emptyActiveTasksList']}"/>
+                </ui:fragment>
+                <ui:fragment
+                        rendered="#{empty viewTasksBean.dataModel.wrappedData and viewTasksBean.tasksExist and viewTasksBean.isTableFiltered}">
+                    <p:outputLabel value="#{msgs['ViewTasks.NoRecordsFound']}"/>
+                </ui:fragment>
+            </h:form>
+        </ui:define>
+    </ui:composition>
+</h:body>
+</html>

@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:c="http://xmlns.jcp.org/jsp/jstl/core"
+      xmlns:p="http://primefaces.org/ui">
+<h:head>
+    <f:metadata>
+        <f:viewParam name="taskId"/>
+    </f:metadata>
+</h:head>
+<h:body>
+    <ui:composition template="templates/layout.xhtml">
+
+        <ui:define name="content">
+
+            <ui:fragment id="errorTaskId"
+                         rendered="#{!viewTaskBean.showMarketing and !viewTaskBean.showOdsInternal and !viewTaskBean.showPA and !viewTaskBean.showRecruitment and !viewTaskBean.showCandidates}">
+                <h4><p:outputLabel value="#{msgs['TaskValidation.taskNotFound']}"/></h4>
+                <br/>
+                <h:form>
+                    <p:commandButton value="#{msgs['DialogButton.Cancel']}"
+                                     styleClass="hrcrm-button"
+                                     ajax="false"
+                                     action="ViewTasks"/>
+                </h:form>
+            </ui:fragment>
+
+            <ui:fragment rendered="#{viewTaskBean.showOdsInternal}">
+                <ui:include src="OdsInternalView.xhtml"/>
+            </ui:fragment>
+
+            <ui:fragment rendered="#{viewTaskBean.showRecruitment}">
+                <ui:include src="RecruitmentView.xhtml"/>
+            </ui:fragment>
+
+            <ui:fragment rendered="#{viewTaskBean.showMarketing}">
+                <ui:include src="MarketingView.xhtml"/>
+            </ui:fragment>
+
+            <ui:fragment rendered="#{viewTaskBean.showPA}">
+                <ui:include src="PerformanceAppraisalsView.xhtml"/>
+            </ui:fragment>
+
+            <ui:fragment rendered="#{viewTaskBean.showCandidates}">
+                <ui:include src="CandidatesView.xhtml"/>
+            </ui:fragment>
+
+
+        </ui:define>
+
+    </ui:composition>
+</h:body>
+</html>

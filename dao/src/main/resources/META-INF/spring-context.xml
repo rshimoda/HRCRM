@@ -20,7 +20,7 @@
           p:persistenceXmlLocation="classpath*:META-INF/persistence.xml"
           p:jpaVendorAdapter-ref="jpaVendorAdapter"
           p:persistenceUnitName="JPA-Hibernate"
-          p:packagesToScan="com.eisgroup.hrcrm.dao.model"/>
+          p:packagesToScan="com.eisgroup.hrcrm.dao.dao"/>
 
     <bean id="jpaVendorAdapter" class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter"/>
 

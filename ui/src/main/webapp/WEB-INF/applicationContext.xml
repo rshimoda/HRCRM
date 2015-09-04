@@ -10,5 +10,14 @@
     <import resource="classpath*:/META-INF/spring-context.xml"/>
 
     <context:component-scan base-package="com.eisgroup.hrcrm"/>
+    <context:annotation-config/>
+    <context:component-scan
+            base-package="com.eisgroup.hrcrm.ui.beans"/>
+
+
+    <bean
+            id="loggerListener"
+            class="org.springframework.security.authentication.event.LoggerListener"/>
+    <!--Custom ViewScope-->
 
 </beans>

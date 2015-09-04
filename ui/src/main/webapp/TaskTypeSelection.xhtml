@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:c="http://xmlns.jcp.org/jsp/jstl/core"
+      xmlns:p="http://primefaces.org/ui">
+
+<h:body>
+    <ui:composition template="templates/layout.xhtml">
+
+        <ui:define name="content">
+            <h2>Task Type Selection</h2>
+
+
+            <h:form style="display: inline">
+                <h:panelGrid id="grid" columns="3" cellpadding="5" width="100%"
+                             columnClasses="grid10, grid10, grid60">
+
+                    <h:outputLabel for="typeselect" value="#{msgs['TaskTypeSelection.TaskType']}"/>
+                    <p:selectOneMenu id="typeselect" style="color: #000000"
+                                     effectSpeed="fast"
+                                     value="#{taskTypeSelectionBean.taskType}"
+                                     required="true"
+                                     requiredMessage="#{msgs['TaskTypeSelection.NullTaskType']}">
+                        <f:selectItem/>
+                        <f:selectItems value="#{taskTypeSelectionBean.taskTypeSelectOptions}"/>
+                        <p:ajax update="typeselectmessage" event="change"/>
+                    </p:selectOneMenu>
+                    <p:message id="typeselectmessage" for="typeselect" display="text"/>
+
+
+                    <p:commandButton action="createTask"
+                                     value="#{msgs['DialogButton.Next']}"
+                                     styleClass="hrcrm-button"
+                                     ajax="false"/>
+
+                    <p:commandButton value="#{msgs['DialogButton.Cancel']}"
+                                     type="button"
+                                     styleClass="hrcrm-button"
+                                     onclick="PF('dlg1').show();"/>
+                    <br/>
+                </h:panelGrid>
+            </h:form>
+            <!-- Create popup menu-->
+            <p:confirmDialog message="#{msgs['Popup.MsgCancel']}"
+                             widgetVar="dlg1" closable="false" severity="alert">
+                <h:panelGroup layout="block" style="text-align: right">
+                    <h:form>
+                        <p:commandButton action="ViewTasks" value="#{msgs['DialogButton.Ok']}"
+                                         styleClass="hrcrm-button" ajax="false"/>
+                        <p:spacer width="20"/>
+                        <p:commandButton value="#{msgs['DialogButton.Cancel']}" type="button"
+                                         styleClass="hrcrm-button" onclick="PF('dlg1').hide();"/>
+                    </h:form>
+                </h:panelGroup>
+            </p:confirmDialog>
+
+
+        </ui:define>
+    </ui:composition>
+</h:body>
+</html>

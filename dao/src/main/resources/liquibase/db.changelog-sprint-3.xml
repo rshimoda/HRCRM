@@ -1,0 +1,370 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.3.xsd http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
+
+
+    <changeSet id="sprint3-1" author="MSizonenko">
+        <sql>
+            UPDATE TASK SET PRIORITY = 'LOW' WHERE PRIORITY IS NULL;
+            UPDATE TASK SET COMPLEXITY_ID = 1 WHERE COMPLEXITY_ID IS NULL AND TASK_TYPE = 'ODSInternal';
+            UPDATE TASK SET COMPLEXITY_ID = 6 WHERE COMPLEXITY_ID IS NULL AND TASK_TYPE = 'Recruitment';
+            UPDATE TASK SET SUMMARY = 'TEST' WHERE SUMMARY IS NULL;
+        </sql>
+    </changeSet>
+    <changeSet id="sprint3-2" author="MSizonenko">
+        <renameTable oldTableName="HUMANRESOURCEMANAGER" newTableName="USERS"/>
+        <renameTable oldTableName="HRM_PROJECT" newTableName="USER_PROJECT"/>
+    </changeSet>
+    <changeSet id="sprint3-3" author="MSizonenko">
+        <renameColumn tableName="USERS" oldColumnName="HR_PRIVILEGES" newColumnName="USER_PRIVILEGES"/>
+        <renameColumn tableName="USER_PROJECT" oldColumnName="HRM_ID" newColumnName="USER_ID"/>
+    </changeSet>
+
+
+    <changeSet id="sprint3-4-changed-cumulative" author="VKarpenko,MSizonenko">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="CANDIDATELEVEL" columnName="TASKTYPE"/>
+            </not>
+        </preConditions>
+
+        <addColumn tableName="CANDIDATELEVEL">
+            <column name="TASKTYPE" type="VARCHAR(255)"/>
+        </addColumn>
+        <update tableName="CANDIDATELEVEL">
+            <column name="TASKTYPE" value="Recruitment"/>
+        </update>
+
+        <createTable tableName="NEWCANDIDATELEVEL">
+            <column autoIncrement="true" name="ID" type="BIGINT(19)"/>
+            <column name="NAME" type="VARCHAR(255)"/>
+            <column name="ISDELETED" type="BOOLEAN" defaultValue="0"/>
+            <column name="ISDEFAULT" type="BOOLEAN" defaultValue="0"/>
+            <column name="TASKTYPE" type="VARCHAR(255)"/>
+        </createTable>
+        <addUniqueConstraint columnNames="NAME, TASKTYPE" tableName="NEWCANDIDATELEVEL" constraintName="CANDLEVUNIQUE"/>
+        <addNotNullConstraint tableName="NEWCANDIDATELEVEL" columnName="NAME" columnDataType="VARCHAR(255)"/>
+        <addNotNullConstraint tableName="NEWCANDIDATELEVEL" columnName="TASKTYPE" columnDataType="VARCHAR(255)"/>
+        <dropForeignKeyConstraint baseTableName="TASK" constraintName="FK_9G2H9MPW1NBDGELSJ29GOEL3M"/>
+        <addPrimaryKey tableName="NEWCANDIDATELEVEL" columnNames="ID"/>
+        <sql>
+            INSERT INTO NEWCANDIDATELEVEL SELECT *
+            FROM CANDIDATELEVEL;
+        </sql>
+        <addForeignKeyConstraint baseColumnNames="CANDIDATELEVEL_ID" baseTableName="TASK"
+                                 deferrable="false" constraintName="FK_TSK_CDLVL"
+                                 initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT"
+                                 referencedColumnNames="ID" referencedTableName="NEWCANDIDATELEVEL"/>
+        <dropTable tableName="CANDIDATELEVEL"/>
+        <renameTable oldTableName="NEWCANDIDATELEVEL" newTableName="CANDIDATELEVEL"/>
+    </changeSet>
+
+    <changeSet id="sprint3-5-changed-cumulative" author="VKarpenko,MSizonenko">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="POSITION" columnName="TASKTYPE"/>
+            </not>
+        </preConditions>
+
+        <addColumn tableName="POSITION">
+            <column name="TASKTYPE" type="VARCHAR(255)"/>
+        </addColumn>
+        <update tableName="POSITION">
+            <column name="TASKTYPE" value="Recruitment"/>
+        </update>
+
+        <createTable tableName="NEWPOSITION">
+            <column autoIncrement="true" name="ID" type="BIGINT(19)"/>
+            <column name="NAME" type="VARCHAR(255)"/>
+            <column name="ISDELETED" type="BOOLEAN" defaultValue="0"/>
+            <column name="ISDEFAULT" type="BOOLEAN" defaultValue="0"/>
+            <column name="TASKTYPE" type="VARCHAR(255)"/>
+        </createTable>
+        <addPrimaryKey tableName="NEWPOSITION" columnNames="ID"/>
+        <addUniqueConstraint columnNames="NAME, TASKTYPE" tableName="NEWPOSITION" constraintName="PSTNUNIQUE"/>
+        <addNotNullConstraint tableName="NEWPOSITION" columnName="NAME" columnDataType="VARCHAR(255)"/>
+        <addNotNullConstraint tableName="NEWPOSITION" columnName="TASKTYPE" columnDataType="VARCHAR(255)"/>
+        <dropForeignKeyConstraint baseTableName="TASK" constraintName="FK_9G2H9MPW1NBDGELSJ0SJTW6CG"/>
+        <sql>
+            INSERT INTO NEWPOSITION SELECT *
+            FROM POSITION;
+        </sql>
+        <addForeignKeyConstraint baseColumnNames="POSITION_ID" baseTableName="TASK"
+                                 deferrable="false" constraintName="FK_TSK_PSTN"
+                                 initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT"
+                                 referencedColumnNames="ID" referencedTableName="NEWPOSITION"/>
+        <dropTable tableName="POSITION"/>
+        <renameTable oldTableName="NEWPOSITION" newTableName="POSITION"/>
+    </changeSet>
+
+    <changeSet id="sprint3-6-changed-cumulative" author="VKarpenko,MSizonenko">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="PROJECT" columnName="TASKTYPE"/>
+            </not>
+        </preConditions>
+
+        <addColumn tableName="PROJECT">
+            <column name="TASKTYPE" type="VARCHAR(255)"/>
+        </addColumn>
+        <update tableName="PROJECT">
+            <column name="TASKTYPE" value="RECRUITMENT"/>
+        </update>
+
+        <createTable tableName="NEWPROJECT">
+            <column autoIncrement="true" name="ID" type="BIGINT(19)"/>
+            <column name="NAME" type="VARCHAR(255)"/>
+            <column name="ISDELETED" type="BOOLEAN" defaultValue="0"/>
+            <column name="ISDEFAULT" type="BOOLEAN" defaultValue="0"/>
+            <column name="TASKTYPE" type="VARCHAR(255)"/>
+        </createTable>
+        <addPrimaryKey tableName="NEWPROJECT" columnNames="ID"/>
+        <addUniqueConstraint columnNames="NAME, TASKTYPE" tableName="NEWPROJECT" constraintName="PRJCTUNIQUE"/>
+        <addNotNullConstraint tableName="NEWPROJECT" columnName="NAME" columnDataType="VARCHAR(255)"/>
+        <addNotNullConstraint tableName="NEWPROJECT" columnName="TASKTYPE" columnDataType="VARCHAR(255)"/>
+        <dropForeignKeyConstraint baseTableName="TASK" constraintName="FK_9G2H9MPW1NBDGELSJVLY03JA1"/>
+        <sql>
+            INSERT INTO NEWPROJECT SELECT *
+            FROM PROJECT;
+        </sql>
+        <addForeignKeyConstraint baseColumnNames="PROJECT_ID" baseTableName="TASK"
+                                 deferrable="false" constraintName="FK_TSK_PRJCT"
+                                 initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT"
+                                 referencedColumnNames="ID" referencedTableName="NEWPROJECT"/>
+        <dropForeignKeyConstraint baseTableName="USER_PROJECT" constraintName="FK_2PRJID"/>
+        <addForeignKeyConstraint baseTableName="USER_PROJECT" baseColumnNames="PROJECT_ID" constraintName="FK_2PRJID-2"
+                                 referencedTableName="NEWPROJECT" referencedColumnNames="ID"/>
+        <dropTable tableName="PROJECT"/>
+        <renameTable oldTableName="NEWPROJECT" newTableName="PROJECT"/>
+    </changeSet>
+
+    <changeSet id="sprint3-19" author="MSizonenko">
+        <sql>
+            INSERT INTO CANDIDATELEVEL (ID, NAME, ISDELETED, ISDEFAULT, TASKTYPE) VALUES ((SELECT 1+MAX(ID) FROM
+            CANDIDATELEVEL), '1', 0, 1, 'Candidate');
+            INSERT INTO CANDIDATELEVEL (ID, NAME, ISDELETED, ISDEFAULT, TASKTYPE) VALUES ((SELECT 1+MAX(ID) FROM
+            CANDIDATELEVEL), '2', 0, 1, 'Candidate');
+            INSERT INTO CANDIDATELEVEL (ID, NAME, ISDELETED, ISDEFAULT, TASKTYPE) VALUES ((SELECT 1+MAX(ID) FROM
+            CANDIDATELEVEL), '3', 0, 1, 'Candidate');
+        </sql>
+    </changeSet>
+
+    <changeSet id="sprint3-26" author="MSizonenko">
+        <sql>
+            INSERT INTO POSITION (ID, NAME, ISDEFAULT, TASKTYPE) VALUES ((SELECT MAX(ID)+1 FROM POSITION), 'BA', 1,
+            'Candidate');
+            INSERT INTO POSITION (ID, NAME, ISDEFAULT, TASKTYPE) VALUES ((SELECT MAX(ID)+1 FROM POSITION), 'PJ', 1,
+            'Candidate');
+            INSERT INTO POSITION (ID, NAME, ISDEFAULT, TASKTYPE) VALUES ((SELECT MAX(ID)+1 FROM POSITION), 'TM', 1,
+            'Candidate');
+        </sql>
+    </changeSet>
+
+    <changeSet id="sprint3-7" author="MKyrylenko">
+        <addColumn tableName="USERS">
+            <column name="ISDELETED" type="BOOLEAN" defaultValue="0"/>
+        </addColumn>
+    </changeSet>
+
+
+    <!--these two changeSets block system on clear DB-->
+    <!--<changeSet id="sprint3-36" author="OStepanenko">-->
+    <!--<dropNotNullConstraint tableName="Task" columnName="Complexity_ID"/>-->
+    <!--</changeSet>-->
+
+    <!--<changeSet id="sprint3-37" author="OStepanenko">-->
+    <!--<dropNotNullConstraint tableName="Task" columnName="Priority"/>-->
+    <!--</changeSet>-->
+
+    <!-- Create table Questions-->
+    <changeSet author="OStepurko" id="sprint3-PA-1">
+        <createTable tableName="QUESTIONS">
+            <column autoIncrement="true" name="ID" type="BIGINT(19)">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="QUESTION" type="VARCHAR(2048)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="ISDELETED" type="BOOLEAN" defaultValue="0"/>
+        </createTable>
+    </changeSet>
+
+    <!-- Create table PerformanceAppraisalDetail -->
+    <changeSet author="OStepurko" id="sprint3-PA-2">
+        <createTable tableName="PERFORMANCEAPPRAISALDETAIL">
+            <column autoIncrement="true" name="ID" type="BIGINT(19)"/>
+            <column name="TASK_ID" type="BIGINT(19)"/>
+            <column name="QUESTION_ID" type="BIGINT(19)"/>
+            <column name="USER_ID" type="BIGINT(19)"/>
+            <column name="ANSWER" type="VARCHAR(2048)"/>
+        </createTable>
+    </changeSet>
+
+    <!-- Create table links -->
+    <changeSet author="OStepurko" id="sprint3-PA-3">
+        <addForeignKeyConstraint baseColumnNames="QUESTION_ID" baseTableName="PERFORMANCEAPPRAISALDETAIL"
+                                 constraintName="PA_QUESTIONS" deferrable="false"
+                                 initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT"
+                                 referencedColumnNames="ID" referencedTableName="QUESTIONS"/>
+    </changeSet>
+
+    <changeSet author="OStepurko" id="sprint3-PA-4">
+        <addForeignKeyConstraint baseColumnNames="TASK_ID" baseTableName="PERFORMANCEAPPRAISALDETAIL"
+                                 constraintName="PA_TASK" deferrable="false"
+                                 initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT"
+                                 referencedColumnNames="ID" referencedTableName="TASK"/>
+    </changeSet>
+
+    <changeSet author="OStepurko" id="sprint3-PA-5">
+        <addForeignKeyConstraint baseColumnNames="USER_ID" baseTableName="PERFORMANCEAPPRAISALDETAIL"
+                                 constraintName="PA_USER" deferrable="false"
+                                 initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT"
+                                 referencedColumnNames="ID" referencedTableName="USERS"/>
+    </changeSet>
+
+    <changeSet id="sprint3-PA-6" author="VKarpenko">
+        <renameColumn tableName="PERFORMANCEAPPRAISALDETAIL" oldColumnName="TASK_ID"
+                      newColumnName="PERFORMANCEAPPRAISAL_ID"/>
+    </changeSet>
+
+    <!--<changeSet author="OStepurko" id="sprint3-PA-6">-->
+    <!--<dropNotNullConstraint tableName="PERFORMANCEAPPRAISALDETAIL" columnName="USER_ID"/>-->
+    <!--</changeSet>-->
+
+    <changeSet id="sprint3-38" author="OAlieksienko">
+        <sql>
+            INSERT INTO CANDIDATELEVEL (ID, NAME, ISDELETED, ISDEFAULT, TASKTYPE) VALUES ((SELECT 1+MAX(ID) FROM
+            CANDIDATELEVEL), '0', 0, 1, 'Candidate');
+        </sql>
+    </changeSet>
+
+    <changeSet id="sprint3-39" author="OAlieksienko">
+        <sql>
+            UPDATE CANDIDATELEVEL SET ISDELETED='0', ISDEFAULT='1' WHERE NAME='0' AND TASKTYPE='Recruitment';
+        </sql>
+    </changeSet>
+
+
+    <changeSet id="sprint3-PA-11" author="OStepurko">
+        <sql>
+            UPDATE CANDIDATELEVEL SET ISDELETED='0', ISDEFAULT='1' WHERE NAME='0' AND TASKTYPE='PerformanceAppraisal';
+            UPDATE CANDIDATELEVEL SET ISDELETED='0', ISDEFAULT='1' WHERE NAME='1' AND TASKTYPE='PerformanceAppraisal';
+            UPDATE CANDIDATELEVEL SET ISDELETED='0', ISDEFAULT='1' WHERE NAME='2' AND TASKTYPE='PerformanceAppraisal';
+            UPDATE CANDIDATELEVEL SET ISDELETED='0', ISDEFAULT='1' WHERE NAME='3' AND TASKTYPE='PerformanceAppraisal';
+        </sql>
+    </changeSet>
+
+    <changeSet id="sprint3-PA-12" author="OStepurko">
+        <sql>
+            UPDATE POSITION SET ISDELETED='0', ISDEFAULT='1' WHERE NAME='PM' AND TASKTYPE='PerformanceAppraisal';
+            UPDATE POSITION SET ISDELETED='0', ISDEFAULT='1' WHERE NAME='PJ' AND TASKTYPE='PerformanceAppraisal';
+            UPDATE POSITION SET ISDELETED='0', ISDEFAULT='1' WHERE NAME='BA' AND TASKTYPE='PerformanceAppraisal';
+        </sql>
+    </changeSet>
+
+    <changeSet id="sprint3-PA-13" author="VKarpenko">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">select count(*) from CANDIDATELEVEL where NAME='0' AND
+                TASKTYPE='PerformanceAppraisal'
+            </sqlCheck>
+        </preConditions>
+        <sql>
+            INSERT INTO CANDIDATELEVEL (ID, NAME, ISDELETED, ISDEFAULT, TASKTYPE)
+            VALUES ((SELECT 1+MAX(ID) FROM CANDIDATELEVEL), '0', 0, 1, 'PerformanceAppraisal');
+        </sql>
+    </changeSet>
+    <changeSet id="sprint3-PA-14" author="VKarpenko">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">select count(*) from CANDIDATELEVEL where NAME='1' AND
+                TASKTYPE='PerformanceAppraisal'
+            </sqlCheck>
+        </preConditions>
+        <sql>
+            INSERT INTO CANDIDATELEVEL (ID, NAME, ISDELETED, ISDEFAULT, TASKTYPE)
+            VALUES ((SELECT 1+MAX(ID) FROM CANDIDATELEVEL), '1', 0, 1, 'PerformanceAppraisal');
+        </sql>
+    </changeSet>
+
+    <changeSet id="sprint3-PA-15" author="VKarpenko">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">select count(*) from CANDIDATELEVEL where NAME='2' AND
+                TASKTYPE='PerformanceAppraisal'
+            </sqlCheck>
+        </preConditions>
+        <sql>
+            INSERT INTO CANDIDATELEVEL (ID, NAME, ISDELETED, ISDEFAULT, TASKTYPE)
+            VALUES ((SELECT 1+MAX(ID) FROM CANDIDATELEVEL), '2', 0, 1, 'PerformanceAppraisal');
+        </sql>
+    </changeSet>
+    <changeSet id="sprint3-PA-16" author="VKarpenko">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">select count(*) from CANDIDATELEVEL where NAME='3' AND
+                TASKTYPE='PerformanceAppraisal'
+            </sqlCheck>
+        </preConditions>
+        <sql>
+            INSERT INTO CANDIDATELEVEL (ID, NAME, ISDELETED, ISDEFAULT, TASKTYPE)
+            VALUES ((SELECT 1+MAX(ID) FROM CANDIDATELEVEL), '3', 0, 1, 'PerformanceAppraisal');
+        </sql>
+    </changeSet>
+
+    <changeSet id="sprint3-PA-17" author="VKarpenko">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">select count(*) from POSITION where NAME='PM' AND
+                TASKTYPE='PerformanceAppraisal'
+            </sqlCheck>
+        </preConditions>
+        <sql>
+            INSERT INTO POSITION (ID, NAME, ISDELETED, ISDEFAULT, TASKTYPE)
+            VALUES ((SELECT 1+MAX(ID) FROM POSITION), 'PM', 0, 1, 'PerformanceAppraisal');
+        </sql>
+    </changeSet>
+    <changeSet id="sprint3-PA-18" author="VKarpenko">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">select count(*) from POSITION where NAME='PJ' AND
+                TASKTYPE='PerformanceAppraisal'
+            </sqlCheck>
+        </preConditions>
+        <sql>
+            INSERT INTO POSITION (ID, NAME, ISDELETED, ISDEFAULT, TASKTYPE)
+            VALUES ((SELECT 1+MAX(ID) FROM POSITION), 'PJ', 0, 1, 'PerformanceAppraisal');
+        </sql>
+    </changeSet>
+    <changeSet id="sprint3-PA-19" author="VKarpenko">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">select count(*) from POSITION where NAME='BA' AND
+                TASKTYPE='PerformanceAppraisal'
+            </sqlCheck>
+        </preConditions>
+        <sql>
+            INSERT INTO POSITION (ID, NAME, ISDELETED, ISDEFAULT, TASKTYPE)
+            VALUES ((SELECT 1+MAX(ID) FROM POSITION), 'BA', 0, 1, 'PerformanceAppraisal');
+        </sql>
+    </changeSet>
+
+    <changeSet id="sprint3-40" author="VKarpenko">
+        <sql>
+            UPDATE PROJECT SET TASKTYPE = 'Recruitment' WHERE TASKTYPE='RECRUITMENT';
+        </sql>
+    </changeSet>
+
+    <changeSet id="sprint3-41" author="MYaskov">
+        <dropForeignKeyConstraint baseTableName="TASK" constraintName="FK_5SCVEB1KLHNB5YTH32T1O6UHY"/>
+        <dropForeignKeyConstraint baseTableName="TASK" constraintName="FK_7D5JN0DNIAB56YNO3BPIJR5N4"/>
+        <dropTable tableName="PERSON"/>
+    </changeSet>
+
+    <changeSet id="sprint3-42" author="MYaskov">
+        <addForeignKeyConstraint baseColumnNames="ASSIGNEE_ID" baseTableName="TASK"
+                                 constraintName="FK_IN0AMY7ACEF0896Z4BQ623F2D" deferrable="false"
+                                 initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT"
+                                 referencedColumnNames="ID" referencedTableName="USERS"/>
+        <addForeignKeyConstraint baseColumnNames="CREATOR_ID" baseTableName="TASK"
+                                 constraintName="FK_KAETV2HFQ2MD78Q9Y11SJR5N4" deferrable="false"
+                                 initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT"
+                                 referencedColumnNames="ID" referencedTableName="USERS"/>
+    </changeSet>
+
+</databaseChangeLog>

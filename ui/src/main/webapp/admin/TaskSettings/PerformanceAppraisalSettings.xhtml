@@ -1,0 +1,300 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui">
+
+    <h:form id="viewEditPerformanceAppraisalSettingForm" onkeypress=
+            "if (event.keyCode == 13) {
+            $('#tabsView\\:tabViewTasksSettings\\:viewEditPerformanceAppraisalSettingForm\\:performanceAppraisalSettingSave').click();
+            return false;}"
+            >
+        <p:panel style="width: 800px;">
+            <p:panelGrid style="width: 100%;height:100%;table-layout:auto;" layout="tabular" styleClass="noBorder">
+
+                <p:row>
+                    <p:column style="width:20%">
+                        <p:outputLabel value="#{msgs['TaskProperty.Position']}"/>
+                    </p:column>
+                    <p:column style="width:20%;">
+                        <p:commandLink style="color: blue; text-decoration: underline"
+                                       value="#{msgs['AdminTask.AddPosition']}"
+                                       actionListener="#{performanceAppraisalSettingBean.startEdit('position')}"
+                                       update=":tabsView,:headerForm"
+                                       disabled="#{performanceAppraisalSettingBean.levelEditMode
+                                or performanceAppraisalSettingBean.questionEditMode}"/>
+                    </p:column>
+                    <p:column style="width:60%;">
+                        <p:outputLabel value="#{performanceAppraisalSettingBean.positions}"
+                                       style="word-wrap:break-word;"
+                                       rendered="#{!performanceAppraisalSettingBean.positionEditMode}"/>
+
+                        <p:inputTextarea id="positionPerformanceAppraisal"
+                                         rows="1" cols="56"
+                                         style="width: 360px; height: auto; Overflow:auto;"
+                                         rendered="#{performanceAppraisalSettingBean.positionEditMode}"
+                                         value="#{performanceAppraisalSettingBean.positions}">
+                            <p:ajax update="positionPerformanceAppraisalMessage, performanceAppraisalSettingSave"
+                                    event="keyup"/>
+                            <f:validator validatorId="stringValuesValidator"/>
+                        </p:inputTextarea>
+                    </p:column>
+                </p:row>
+
+                <p:row>
+                    <p:column colspan="3" style="height:30px!important;">
+                        <p:message for="positionPerformanceAppraisal" id="positionPerformanceAppraisalMessage"
+                                   display="text"/>
+                    </p:column>
+                </p:row>
+
+                <p:row>
+                    <p:column style="width:20%">
+                        <p:outputLabel value="#{msgs['TaskProperty.CandidateLevel']}"/>
+                    </p:column>
+                    <p:column style="width:20%;">
+                        <p:commandLink style="color: blue; text-decoration: underline"
+                                       value="#{msgs['AdminTask.AddLevel']}"
+                                       actionListener="#{performanceAppraisalSettingBean.startEdit('level')}"
+                                       update=":tabsView"
+                                       disabled="#{performanceAppraisalSettingBean.positionEditMode
+                                or performanceAppraisalSettingBean.questionEditMode}"/>
+                    </p:column>
+                    <p:column style="width:60%;">
+                        <p:outputLabel value="#{performanceAppraisalSettingBean.levels}"
+                                       style="word-wrap:break-word;"
+                                       rendered="#{!performanceAppraisalSettingBean.levelEditMode}"/>
+
+                        <p:inputTextarea id="levelPerformanceAppraisal"
+                                         rows="1" cols="56"
+                                         style="width: 360px; height: auto; Overflow:auto;"
+                                         rendered="#{performanceAppraisalSettingBean.levelEditMode}"
+                                         value="#{performanceAppraisalSettingBean.levels}">
+                            <p:ajax update="levelPerformanceAppraisalMessage, performanceAppraisalSettingSave"
+                                    event="keyup"/>
+                            <f:validator validatorId="stringIntegersValidator"/>
+                        </p:inputTextarea>
+                    </p:column>
+                </p:row>
+
+                <p:row>
+                    <p:column colspan="3" style="height:30px!important;">
+                        <p:message for="levelPerformanceAppraisal" id="levelPerformanceAppraisalMessage"
+                                   display="text"/>
+                    </p:column>
+                </p:row>
+
+                <!-- =============== questions ================  -->
+
+                <p:row>
+                    <p:column style="width:20%; vertical-align: top;">
+                        <p:outputLabel value="#{msgs['AdminTask.Question']}"/>
+                    </p:column>
+                    <p:column style="width:20%; vertical-align: top;">
+                        <p:commandLink style="color: blue; text-decoration: underline"
+                                       actionListener="#{performanceAppraisalSettingBean.startEdit('question')}"
+                                       action="#{performanceAppraisalSettingBean.setIsAddQuestion(true)}"
+                                       value="#{msgs['AdminTask.AddQuestion']}"
+                                       onsuccess="scrollToQuestionField()"
+                                       disabled="#{performanceAppraisalSettingBean.positionEditMode
+                  or performanceAppraisalSettingBean.levelEditMode or performanceAppraisalSettingBean.indQuestionInEditMode > 0}"><!--actionListener="# {performanceAppraisalSettingBean.startEdit('question')}" -->
+                            <p:ajax event="click"
+                                    disabled="#{!performanceAppraisalSettingBean.questionEditMode}"
+                                    listener="#{performanceAppraisalSettingBean.addQuestion}"
+                                    update=":tabsView"/>
+                        </p:commandLink>
+                    </p:column>
+
+
+                    <p:column style="width:60%;">
+                        <!-- into this panelGrid will be added all questions dynamically" -->
+                        <div style="overflow-x: hidden; overflow-y: auto; max-height: 200px; word-wrap: break-word; word-break: break-all;">
+                            <p:dataTable id="questionsPerformanceAppraisalPanel"
+                                         var="question"
+                                         value="#{performanceAppraisalSettingBean.questions}"
+                                         style="align-items: center; overflow-y: auto; border: 5px;"
+                                         scrollable="true"
+                                         styleClass="borderlesss hide-column-names">
+
+                                <p:column style="width: 8%; vertical-align: top"
+                                          rendered="#{!performanceAppraisalSettingBean.questionEditMode}">
+                                    <p:panelGrid id="arrowPanel" style="float: left; height: 17px; padding: 2px 5px ;">
+                                        <p:row>
+                                            <p:column style="line-height: 0.1;">
+                                                <p:spacer height="7px"
+                                                          rendered="#{performanceAppraisalSettingBean.isFirstQuestion(question)}"/>
+                                                <p:spacer height="7px"/>
+                                                <p:commandButton id="upButton"
+                                                                 type="button"
+                                                                 style="background-color: transparent; cursor:pointer; width: 16px; height: 8px; border: none; vertical-align: bottom;"
+                                                                 rendered="#{!performanceAppraisalSettingBean.isFirstQuestion(question)}"
+                                                                 icon="hrcrm-up-icon"><!--onclick="# {performanceAppraisalSettingBean.moveQuestion(question.name, 'up')}" -->
+                                                    <p:ajax event="click"
+                                                            listener="#{performanceAppraisalSettingBean.moveQuestionUp(question)}"
+                                                            update=":tabsView"/>
+                                                </p:commandButton>
+                                                <p:spacer height="3px"
+                                                          rendered="#{performanceAppraisalSettingBean.isLastQuestion(question)}"/>
+                                            </p:column>
+                                        </p:row>
+                                        <p:row>
+                                            <p:column style="max-height: 10px">
+                                                <p:commandButton id="downButton"
+                                                                 type="button"
+                                                                 style="background-color:transparent; cursor:pointer; width: 16px; height: 8px; border: none;"
+                                                                 rendered="#{!performanceAppraisalSettingBean.isLastQuestion(question)}"
+                                                                 icon="hrcrm-down-icon"><!--onclick="# {performanceAppraisalSettingBean.moveQuestion(question.name, 'down')}" -->
+                                                    <p:ajax event="click"
+                                                            listener="#{performanceAppraisalSettingBean.moveQuestionDown(question)}"
+                                                            update=":tabsView"/>
+                                                </p:commandButton>
+                                            </p:column>
+                                        </p:row>
+                                    </p:panelGrid>
+                                </p:column>
+
+                                <p:column style="width: 75%">
+                                    <p:panelGrid style="height: auto">
+                                        <p:row>
+                                            <p:column style="width: 290px">
+                                                <h:outputText style="font-weight: bold"
+                                                              value="#{performanceAppraisalSettingBean.getQuestionNumber(question)}"/>
+                                                <h:outputText
+                                                        rendered="#{!performanceAppraisalSettingBean.isQuestionInEditMode(question)}"
+                                                        value="#{question.name}"
+                                                        style="width: 290px; height: auto; font-weight: bold"/>
+                                                <p:inputTextarea
+                                                        rendered="#{performanceAppraisalSettingBean.questionEditMode and performanceAppraisalSettingBean.isQuestionInEditMode(question)}"
+                                                        value="#{question.name}"
+                                                        id="inputTextArea"
+                                                        rows="1"
+                                                        cols="56"
+                                                        style="width: 290px; height: auto;"><!--onkeyup="# {performanceAppraisalSettingBean.questions.set(performanceAppraisalSettingBean.questions.indexOf(question.name), question.name)}" -->
+                                                    <p:ajax event="change"
+                                                            listener="#{performanceAppraisalSettingBean.questions.set(performanceAppraisalSettingBean.questions.indexOf(question.name), question.name)}"/>
+                                                    <p:ajax update="questionPerformanceAppraisalMessage, :tabsView:tabViewTasksSettings:viewEditPerformanceAppraisalSettingForm:performanceAppraisalSettingSave"
+                                                            event="keyup"/>
+                                                    <f:validator validatorId="questionValidator"/>
+                                                </p:inputTextarea>
+                                            </p:column>
+                                        </p:row>
+
+                                        <p:row>
+                                            <p:column colspan="3" style="height:30px!important;">
+                                                <p:message for="inputTextArea" id="questionPerformanceAppraisalMessage"
+                                                           display="text"/>
+                                            </p:column>
+                                        </p:row>
+                                    </p:panelGrid>
+                                </p:column>
+
+                                <p:column style="width: 10%; alignment: center; vertical-align: top">
+                                    <p:commandLink id="editCommandLink"
+                                                   style="color: blue; text-decoration: underline; width: 50px; vertical-align: top"
+                                                   value="#{msgs['AdminTask.EditQuestion']}"
+                                                   onsuccess="scrollToQuestionField()"
+                                                   disabled="#{performanceAppraisalSettingBean.questionEditMode
+                                                    or performanceAppraisalSettingBean.positionEditMode
+                                                    or performanceAppraisalSettingBean.levelEditMode}">
+                                        <p:ajax event="click"
+                                                listener="#{performanceAppraisalSettingBean.startEditQuestion(question)}"
+                                                update=":tabsView"/>
+                                    </p:commandLink>
+
+                                </p:column>
+                                <p:column style="width: 15%; alignment: center; vertical-align: top">
+                                    <p:commandLink id="deleteCommandLink"
+                                                   style="color: blue; text-decoration: underline; width: 50px; vertical-align: top"
+                                                   value="#{msgs['AdminTask.DeleteQuestion']}"
+                                                   actionListener="#{performanceAppraisalSettingBean.setDeleteQuestionIndex(performanceAppraisalSettingBean.getQuestionIndex(question))}"
+                                                   disabled="#{performanceAppraisalSettingBean.questionEditMode
+                                                    or performanceAppraisalSettingBean.positionEditMode
+                                                    or performanceAppraisalSettingBean.levelEditMode}"
+                                                   onclick="PF('PerformanceAppraisalSettingDeleteDlg').show();"/>
+                                </p:column>
+
+
+                            </p:dataTable>
+                        </div>
+                    </p:column>
+                </p:row>
+
+
+                <script> //scroll to question
+                function scrollToQuestionField() {
+                    var questions = $(".ui-datatable .ui-datatable-data .ui-inputtextarea");
+                    if (questions.length !== 0) {
+                        setTimeout(function () {
+                            questions.last().focus();
+                        }, 25);
+                    }
+                }
+
+                </script>
+
+                <!-- =============== questions ================  -->
+
+                <p:row>
+                    <p:column style="width: 20%;vertical-align: bottom;height:40px;">
+                        <p:commandButton value="#{msgs['DialogButton.Save']}"
+                                         id="performanceAppraisalSettingSave"
+                                         styleClass="hrcrm-button"
+                                         action="#{performanceAppraisalSettingBean.save}"
+                                         disabled="#{!performanceAppraisalSettingBean.editMode or facesContext.validationFailed}"
+                                         update=":tabsView,:headerForm"/>
+                    </p:column>
+                    <p:column style="width: 20%;vertical-align: bottom">
+                        <p:commandButton value="#{msgs['DialogButton.Cancel']}"
+                                         styleClass="hrcrm-button"
+                                         type="button"
+                                         disabled="#{!performanceAppraisalSettingBean.editMode}"
+                                         onclick="PF('PerformanceAppraisalSettingDlg').show();"/>
+                    </p:column>
+                    <p:column style="width: 60%"/>
+                </p:row>
+
+            </p:panelGrid>
+        </p:panel>
+    </h:form>
+
+    <p:confirmDialog message="#{msgs['Popup.PerformanceAppraisalSettingCancel']}"
+                     widgetVar="PerformanceAppraisalSettingDlg" closable="false" severity="alert">
+        <h:panelGroup layout="block" style="text-align: right">
+            <h:form>
+                <p:cache id="cache"/>
+                <p:commandButton value="#{msgs['DialogButton.Ok']}"
+                                 styleClass="hrcrm-button"
+                                 oncomplete="PF('PerformanceAppraisalSettingDlg').hide();"
+                                 actionListener="#{performanceAppraisalSettingBean.cancelState}"
+                                 action="#{performanceAppraisalSettingBean.init}"
+                                 update=":tabsView,:headerForm"/>
+                <p:spacer width="20"/>
+                <p:commandButton value="#{msgs['DialogButton.Cancel']}"
+                                 type="button"
+                                 styleClass="hrcrm-button"
+                                 onclick="PF('PerformanceAppraisalSettingDlg').hide();"/>
+            </h:form>
+        </h:panelGroup>
+    </p:confirmDialog>
+
+    <p:confirmDialog message="#{msgs['Popup.PerformanceAppraisalSettingDelete']}"
+                     id="deleteConfirmDialog"
+                     widgetVar="PerformanceAppraisalSettingDeleteDlg" closable="false" severity="alert">
+        <h:panelGroup layout="block" style="text-align: right">
+            <h:form id="deleteDialogForm">
+                <p:cache id="idCache"/>
+                <p:commandButton value="#{msgs['DialogButton.Ok']}"
+                                 styleClass="hrcrm-button"
+                                 oncomplete="PF('PerformanceAppraisalSettingDlg').hide();"
+                                 action="#{performanceAppraisalSettingBean.deleteQuestion}"
+                                 update=":tabsView,:headerForm"/>
+                <p:spacer width="20"/>
+                <p:commandButton value="#{msgs['DialogButton.Cancel']}"
+                                 type="button"
+                                 ajax="false"
+                                 styleClass="hrcrm-button"
+                                 onclick="PF('PerformanceAppraisalSettingDeleteDlg').hide();"/>
+            </h:form>
+        </h:panelGroup>
+    </p:confirmDialog>
+</ui:composition>

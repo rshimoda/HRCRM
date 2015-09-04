@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:c="http://xmlns.jcp.org/jsp/jstl/core"
+      xmlns:p="http://primefaces.org/ui">
+
+<h:body>
+    <ui:composition template="../templates/layout.xhtml">
+
+
+        <ui:define name="content">
+            <f:event type="preRenderView"
+                     listener="#{loginBean.checkAuthentication}"/>
+            <h:outputStylesheet>
+                .ui-messages-error {
+                    padding: 4px !important;
+                    margin: 0 !important;
+
+                }
+
+                .ui-messages-error-detail {
+                    margin-left: 0 !important;
+                }
+
+                .ui-messages {
+                    padding-left: 5px;
+                    padding-right: 5px;
+                }
+
+                .ui-messages-error-summary {
+                    margin-left: 6px !important;
+                }
+            </h:outputStylesheet>
+            <h:form id="loginForm" DefaultButton="loginButton" prependId="false">
+                <p:panelGrid style="width: 60em;margin: 0 auto" layout="tabular" styleClass="noBorder">
+                    <p:row>
+                        <p:column style="width: 10em;height: 3em">
+                            <h:outputLabel for="j_username" value="Username"/>
+                        </p:column>
+                        <p:column>
+                            <p:inputText
+                                    id="j_username"
+                                    value="#{loginBean.username}"
+                                    style="width: 100%">
+                                <!--validatorMessage="#{msgs['Error.InvalidInputData']}">-->
+                                <!--requiredMessage="#{msgs['Error.NoLoginEntered']}"-->
+
+                                <!--<f:validator validatorId="latinNumberSpecialValidator"/>-->
+                                <!--<p:ajax update="j_usernameMessage" event="keyup"/>-->
+                                <p:ajax update="loginMessage" event="keyup"/>
+                            </p:inputText>
+                        </p:column>
+                        <p:column style="width: 30em">
+                            <!--<p:message for="j_username" id="j_usernameMessage" display="text"/>-->
+                        </p:column>
+                    </p:row>
+
+                    <p:row>
+                        <p:column>
+                            <h:outputLabel for="j_password" value="Password"/>
+                        </p:column>
+                        <p:column style="height: 3em">
+                            <p:password
+                                    id="j_password"
+                                    value="#{loginBean.password}"
+                                    feedback="false"
+                                    onkeypress="parseEnterKey(event)"
+                                    style="width: 100%">
+                                <!--required="true"-->
+                                <!--requiredMessage="#{msgs['Error.NoPasswordEntered']}"-->
+                                <!--<p:ajax update="j_passwordMessage" event="keyup"/>-->
+                                <p:ajax update="loginMessage" event="keyup"/>
+                            </p:password>
+                        </p:column>
+                        <p:column>
+                            <!--<p:message for="j_password" id="j_passwordMessage" display="text"/>-->
+                        </p:column>
+                    </p:row>
+
+                    <p:row>
+                        <p:column>
+                            <p:commandButton
+                                    id="loginButton"
+                                    action="#{loginBean.loginProject}"
+                                    value="#{msgs['DialogButton.Login']}"
+                                    update="loginForm"
+                                    ajax="false"
+                                    styleClass="hrcrm-button" oncomplete="reset()">
+                            </p:commandButton>
+                        </p:column>
+                        <p:column>
+                            <p:messages id="loginMessage" autoUpdate="true" showIcon="false" showDetail="true"
+                                        display="test"/>
+                        </p:column>
+                    </p:row>
+
+                </p:panelGrid>
+            </h:form>
+            <script type="text/javascript">
+                window.onreset = function () {
+                    return "Are you sure you want to leave? Think of the kittens!";
+                }
+                function reset() {
+                    document.getElementById("loginForm").reset();
+                }
+                function parseEnterKey(e) {
+                    var charCode = (e.which) ? e.which : e.keyCode
+                    if (charCode == 13) {
+                        document.getElementById("loginButton").click();
+                    }
+                    return false;
+                }
+            </script>
+        </ui:define>
+    </ui:composition>
+
+</h:body>
+
+</html>

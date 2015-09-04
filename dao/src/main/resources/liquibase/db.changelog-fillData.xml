@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.3.xsd http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
+    <changeSet author="VKarpenko" id="1423221248748-1">
+        <insert tableName="COMPLEXITY">
+            <column name="ID" valueNumeric="1"/>
+            <column name="COMPLEXITY" value="1"/>
+        </insert>
+        <insert tableName="COMPLEXITY">
+            <column name="ID" valueNumeric="2"/>
+            <column name="COMPLEXITY" value="2"/>
+        </insert>
+        <insert tableName="COMPLEXITY">
+            <column name="ID" valueNumeric="3"/>
+            <column name="COMPLEXITY" value="3"/>
+        </insert>
+        <insert tableName="COMPLEXITY">
+            <column name="ID" valueNumeric="4"/>
+            <column name="COMPLEXITY" value="4"/>
+        </insert>
+        <insert tableName="COMPLEXITY">
+            <column name="ID" valueNumeric="5"/>
+            <column name="COMPLEXITY" value="5"/>
+        </insert>
+    </changeSet>
+
+    <changeSet author="VKarpenko" id="1423221248748-2">
+        <insert tableName="PRIORITY">
+            <column name="ID" valueNumeric="1"/>
+            <column name="PRIORITY" value="Low"/>
+        </insert>
+        <insert tableName="PRIORITY">
+            <column name="ID" valueNumeric="2"/>
+            <column name="PRIORITY" value="Medium"/>
+        </insert>
+        <insert tableName="PRIORITY">
+            <column name="ID" valueNumeric="3"/>
+            <column name="PRIORITY" value="High"/>
+        </insert>
+        <insert tableName="PRIORITY">
+            <column name="ID" valueNumeric="4"/>
+            <column name="PRIORITY" value="Critical"/>
+        </insert>
+    </changeSet>
+    <changeSet author="VKarpenko" id="1423221248748-3">
+        <insert tableName="RESOLUTION">
+            <column name="ID" valueNumeric="1"/>
+            <column name="RESOLUTION" value="Unresolved"/>
+        </insert>
+        <insert tableName="RESOLUTION">
+            <column name="ID" valueNumeric="2"/>
+            <column name="RESOLUTION" value="Resolved"/>
+        </insert>
+    </changeSet>
+    <changeSet author="VKarpenko" id="1423221248748-4">
+        <insert tableName="STATUS">
+            <column name="ID" valueNumeric="1"/>
+            <column name="STATUS" value="Open"/>
+        </insert>
+        <insert tableName="STATUS">
+            <column name="ID" valueNumeric="2"/>
+            <column name="STATUS" value="Closed"/>
+        </insert>
+        <insert tableName="STATUS">
+            <column name="ID" valueNumeric="3"/>
+            <column name="STATUS" value="In Progress"/>
+        </insert>
+        <insert tableName="STATUS">
+            <column name="ID" valueNumeric="4"/>
+            <column name="STATUS" value="Resolved"/>
+        </insert>
+    </changeSet>
+    <changeSet author="VKarpenko" id="1423221248748-6">
+        <insert tableName="TASKTYPE">
+            <column name="ID" valueNumeric="1"/>
+            <column name="TASKTYPE" value="ODSInternal"/>
+        </insert>
+    </changeSet>
+    <changeSet author="VKarpenko" id="1423221248748-7">
+        <insert tableName="PERSON">
+            <column name="ID" valueNumeric="1"/>
+            <column name="FIRSTNAME" value="John"/>
+            <column name="LASTNAME" value="Brown"/>
+        </insert>
+    </changeSet>
+
+</databaseChangeLog>

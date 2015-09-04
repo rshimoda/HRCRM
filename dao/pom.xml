@@ -9,13 +9,17 @@
         <version>1.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>dao</artifactId>
-    <name>dao</name>
+    <artifactId>HRCRM-dao</artifactId>
+    <name>HRCRM-dao</name>
 
     <dependencies>
         <dependency>
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.primefaces</groupId>
+            <artifactId>primefaces</artifactId>
         </dependency>
 
         <dependency>
@@ -49,35 +53,48 @@
             <artifactId>spring-tx</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-test</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.liquibase</groupId>
             <artifactId>liquibase-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>p6spy</groupId>
+            <artifactId>p6spy</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>1.7.12</version>
         </dependency>
 
     </dependencies>
     <build>
-        <finalName>dao</finalName>
+        <finalName>HRCRM-dao</finalName>
         <plugins>
-            <plugin>
-                <groupId>org.liquibase</groupId>
-                <artifactId>liquibase-maven-plugin</artifactId>
-                <version>3.3.2</version>
-                <configuration>
-                    <changeLogFile>liquibase/db.changelog-master.xml</changeLogFile>
-                    <driver>org.h2.Driver</driver>
-                    <url>jdbc:h2:tcp://localhost/~/MD</url>
-                    <username>sa</username>
-                    <password>sa</password>
-                    <promptOnNonLocalDatabase>false</promptOnNonLocalDatabase>
-                </configuration>
-                <executions>
-                    <execution>
-                        <phase>process-resources</phase>
-                        <goals>
-                            <goal>update</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
+            <!--<plugin>-->
+            <!--<groupId>org.liquibase</groupId>-->
+            <!--<artifactId>liquibase-maven-plugin</artifactId>-->
+            <!--<version>3.3.2</version>-->
+            <!--<configuration>-->
+            <!--<changeLogFile>liquibase/db.changelog-master.xml</changeLogFile>-->
+            <!--<driver>org.h2.Driver</driver>-->
+            <!--<url>jdbc:h2:tcp://localhost/~/MD</url>-->
+            <!--<username>sa</username>-->
+            <!--<password>sa</password>-->
+            <!--<promptOnNonLocalDatabase>false</promptOnNonLocalDatabase>-->
+            <!--</configuration>-->
+            <!--<executions>-->
+            <!--<execution>-->
+            <!--<phase>process-resources</phase>-->
+            <!--<goals>-->
+            <!--<goal>update</goal>-->
+            <!--</goals>-->
+            <!--</execution>-->
+            <!--</executions>-->
+            <!--</plugin>-->
         </plugins>
     </build>
 

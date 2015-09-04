@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.3.xsd http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
+
+    <changeSet author="VKarpenko" id="1423221333333-1">
+        <addColumn tableName="TASK">
+            <column name="TASKTYPE" type="VARCHAR(255)"/>
+        </addColumn>
+    </changeSet>
+
+    <changeSet author="VKarpenko" id="1423221333333-2">
+        <sql>
+            UPDATE TASK SET TASKTYPE = 'ODSINTERNAL' WHERE TASKTYPE_ID=1;
+        </sql>
+    </changeSet>
+
+    <changeSet author="VKarpenko" id="1423221333333-3">
+        <dropForeignKeyConstraint baseTableName="TASK" constraintName="FK_SQUFI6YV9WDER7RLA6QIEQ9K"/>
+    </changeSet>
+
+    <changeSet author="VKarpenko" id="1423221333333-4">
+        <dropColumn tableName="TASK" columnName="TASKTYPE_ID"/>
+    </changeSet>
+
+
+    <changeSet id="1423221333333-5" author="VKarpenko">
+        <dropTable tableName="TASKTYPE"/>
+    </changeSet>
+
+
+    <changeSet author="VKarpenko" id="1423221333333-6">
+        <addColumn tableName="TASK">
+            <column name="STATUS" type="VARCHAR(255)"/>
+        </addColumn>
+    </changeSet>
+
+    <changeSet author="VKarpenko" id="1423221333333-7">
+        <sql>
+            UPDATE TASK SET STATUS = 'OPEN' WHERE STATUS_ID=1;
+            UPDATE TASK SET STATUS = 'CLOSED' WHERE STATUS_ID=2;
+            UPDATE TASK SET STATUS = 'IN_PROGRESS' WHERE STATUS_ID=3;
+            UPDATE TASK SET STATUS = 'RESOLVED' WHERE STATUS_ID=4;
+        </sql>
+    </changeSet>
+
+    <changeSet author="VKarpenko" id="1423221333333-8">
+        <dropForeignKeyConstraint baseTableName="TASK"
+                                  constraintName="FK_O4FB4OQ31UJ3Q13YRCQB65N0V"/>
+    </changeSet>
+
+    <changeSet author="VKarpenko" id="1423221333333-9">
+        <dropColumn tableName="TASK" columnName="STATUS_ID"/>
+    </changeSet>
+
+    <changeSet id="1423221333333-10" author="VKarpenko">
+        <dropTable tableName="STATUS"/>
+    </changeSet>
+
+    <changeSet author="VKarpenko" id="1423221333333-11">
+        <addColumn tableName="TASK">
+            <column name="PRIORITY" type="VARCHAR(255)"/>
+        </addColumn>
+    </changeSet>
+
+    <changeSet author="VKarpenko" id="1423221333333-12">
+        <sql>
+            UPDATE TASK SET PRIORITY = 'LOW' WHERE PRIORITY_ID=1;
+            UPDATE TASK SET PRIORITY = 'MEDIUM' WHERE PRIORITY_ID=2;
+            UPDATE TASK SET PRIORITY = 'HIGH' WHERE PRIORITY_ID=3;
+            UPDATE TASK SET PRIORITY = 'CRITICAL' WHERE PRIORITY_ID=4;
+        </sql>
+    </changeSet>
+
+    <changeSet author="VKarpenko" id="1423221333333-13">
+        <dropForeignKeyConstraint baseTableName="TASK"
+                                  constraintName="FK_9G2H9MPW1NBDGELSJ2RP8SOVW"/>
+    </changeSet>
+
+    <changeSet author="VKarpenko" id="1423221333333-14">
+        <dropColumn tableName="TASK" columnName="PRIORITY_ID"/>
+    </changeSet>
+
+    <changeSet id="1423221333333-15" author="VKarpenko">
+        <dropTable tableName="PRIORITY"/>
+    </changeSet>
+
+    <changeSet id="1423221333333-16" author="MKyrylenko">
+        <dropColumn tableName="TASK" columnName="TASKTYPE"/>
+    </changeSet>
+</databaseChangeLog>

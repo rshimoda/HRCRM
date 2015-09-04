@@ -1,0 +1,907 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:c="http://java.sun.com/jsp/jstl/core"
+        >
+
+    <h:form id="performanceAppraisalsViewForm">
+        <!--Header section -->
+        <p>
+            <p:link outcome="ViewTasks" value="#{msgs['TaskProperty.ViewTasks']}" styleClass="hrcrm-link"/>
+            <p:spacer width="5" height="1"/>
+            >
+            <p:spacer width="5" height="1"/>
+            <p:commandLink action="#{performanceAppraisalsBean.fiterViewTasks()}"
+                           value="#{msgs['TaskProperty.PerformanceAppraisal']}" styleClass="hrcrm-link"/>
+            <p:spacer width="5" height="1"/>
+            >
+            <p:spacer width="5" height="1"/>
+            <p:outputLabel value="#{performanceAppraisalsBean.task.id}"/>
+        </p>
+
+
+        <p:panelGrid style="width: 80em;table-layout:fixed;" styleClass="noBorder" layout="tabular">
+            <p:row>
+                <p:column style="height: 5em; width: 55em">
+                    <h4>
+                        <p:outputLabel
+                                value="#{performanceAppraisalsBean.task.id}: #{performanceAppraisalsBean.task.summary}"
+                                style="word-wrap:break-word;"
+                                rendered="#{!performanceAppraisalsBean.editMode}"/>
+                        <p:inputText id="summary"
+                                     required="true"
+                                     style="width:100%;"
+                                     rendered="#{performanceAppraisalsBean.editMode}"
+                                     requiredMessage="#{msgs['TaskValidation.emptyError']}"
+                                     value="#{performanceAppraisalsBean.task.summary}">
+                            <p:ajax update="summaryMessage" event="keyup"/>
+                            <f:validator validatorId="summaryValidator"/>
+                        </p:inputText>
+                    </h4>
+                </p:column>
+                <p:column>
+                    <p:message for="summary" id="summaryMessage" display="text"/>
+                </p:column>
+            </p:row>
+
+            <!-- Button Panel -->
+            <p:row>
+                <p:column>
+                    <p:panelGrid id="ButtonPanel" style="table-layout:fixed;" styleClass="noBorder">
+                        <p:row>
+                            <p:column style="width: 9em">
+                                <p:commandButton value="#{msgs['DialogButton.Edit']}"
+                                                 styleClass="hrcrm-button"
+                                                 actionListener="#{performanceAppraisalsBean.startEdit()}"
+                                                 update="performanceAppraisalsViewForm"
+                                                 rendered="#{!performanceAppraisalsBean.editMode and !performanceAppraisalsBean.taskIsClosed}"/>
+                                <p:commandButton value="#{msgs['DialogButton.Update']}"
+                                                 rendered="#{performanceAppraisalsBean.editMode}"
+                                                 actionListener="#{performanceAppraisalsBean.finishUpdate()}"
+                                                 update="performanceAppraisalsViewForm" styleClass="hrcrm-button"/>
+                            </p:column>
+                            <p:column style="width: 9em">
+                                <p:commandButton value="#{msgs['DialogButton.Cancel']}"
+                                                 styleClass="hrcrm-button"
+                                                 type="button"
+                                                 onclick="PF('dlg1').show();"
+                                                 rendered="#{performanceAppraisalsBean.editMode}"/>
+                            </p:column>
+
+                            <p:column style="width: 13em">
+                                <p:commandButton value="#{msgs['DialogButton.StartProgress']}"
+                                                 styleClass="hrcrm-button-long"
+                                                 rendered="#{!performanceAppraisalsBean.taskIsClosed and !performanceAppraisalsBean.editMode}"/>
+                            </p:column>
+
+                            <p:column style="width: 9em">
+                                <p:commandButton value="#{msgs['DialogButton.Assign']}"
+                                                 styleClass="hrcrm-button"
+                                                 rendered="#{!performanceAppraisalsBean.taskIsClosed and !performanceAppraisalsBean.editMode}"
+                                                 update=":perfseta1"
+                                                 oncomplete="PF('seta1').show();"
+                                                 disabled="#{not empty performanceAppraisalsBean.task.assignee}"/>
+                            </p:column>
+
+                            <p:column style="width: 9em">
+                                <p:commandButton value="#{msgs['DialogButton.Resolve']}"
+                                                 styleClass="hrcrm-button"
+                                                 rendered="#{!performanceAppraisalsBean.taskIsClosed and !performanceAppraisalsBean.editMode}"
+                                                 update=":rezolutionPA"
+                                                 oncomplete="PF('rezol1').show();"/>
+                            </p:column>
+
+                            <p:column style="width: 9em">
+                                <p:commandButton value="#{msgs['DialogButton.Close']}"
+                                                 styleClass="hrcrm-button"
+                                                 actionListener="#{performanceAppraisalsBean.closeTask()}"
+                                                 rendered="#{!performanceAppraisalsBean.taskIsClosed and !performanceAppraisalsBean.editMode}"
+                                                 update="performanceAppraisalsViewForm"/>
+                                <p:commandButton value="#{msgs['DialogButton.Reopen']}"
+                                                 styleClass="hrcrm-button"
+                                                 actionListener="#{performanceAppraisalsBean.reopen}"
+                                                 update="performanceAppraisalsViewForm"
+                                                 rendered="#{performanceAppraisalsBean.taskIsClosed}"/>
+                            </p:column>
+                        </p:row>
+                    </p:panelGrid>
+                </p:column>
+            </p:row>
+
+
+            <p:row>
+                <p:column style="vertical-align: top">
+                    <p:panelGrid id="leftPanelGrid" styleClass="noBorder"
+                                 style="width: 100%; table-layout:fixed; vertical-align: top">
+                        <p:row>
+                            <p:column colspan="6">
+                                <h4 class="headerWithLine">
+                                    <p:outputLabel value="#{msgs['TaskProperty.Details']}"/>
+                                </h4>
+
+                            </p:column>
+                        </p:row>
+
+                        <!-- TASKTYPE + STATUS ROW -->
+                        <p:row>
+                            <p:column style="width: 10%">
+                                <p:outputLabel value="#{msgs['TaskProperty.TaskType']}:"/>
+                            </p:column>
+                            <p:column colspan="2" style="width: 40%">
+                                <p:outputLabel
+                                        value="#{msgs[performanceAppraisalsBean.task.getClass().getName()]}"/>
+                            </p:column>
+                            <p:column style="width: 10%">
+                                <p:outputLabel value="#{msgs['TaskProperty.Status']}:"/>
+                            </p:column>
+                            <p:column colspan="2" style="width: 40%">
+                                <p:outputLabel value="#{performanceAppraisalsBean.task.status.name}"/>
+                            </p:column>
+                        </p:row>
+
+                        <!--PROJECT + RESOLUTION ROW -->
+                        <p:row>
+                            <p:column>
+                                <p:outputLabel value="#{msgs['TaskProperty.Project']}"/>
+                            </p:column>
+                            <p:column colspan="2">
+                                <p:selectOneMenu id="project"
+                                                 style="color: #000000;width:40%;"
+                                                 effectSpeed="fast"
+                                                 value="#{performanceAppraisalsBean.task.project}"
+                                                 rendered="#{performanceAppraisalsBean.editMode}"
+                                                 converter="#{projectConverter}"
+                                                 required="true"
+                                                 requiredMessage="#{msgs['TaskValidation.emptyError']}">
+                                    <f:selectItem/>
+                                    <f:selectItems value="#{performanceAppraisalsBean.projects}"
+                                                   var="project"
+                                                   itemValue="#{project}"
+                                                   itemLabel="#{project.name}"/>
+                                    <p:ajax update="projectMessage" event="change"/>
+                                </p:selectOneMenu>
+                                <p:outputLabel
+                                        value="#{performanceAppraisalsBean.task.project.name}"
+                                        style="word-wrap:break-word;"
+                                        rendered="#{!performanceAppraisalsBean.editMode}"/>
+                                <p:message id="projectMessage" for="project" display="text"/>
+                            </p:column>
+                            <p:column>
+                                <p:outputLabel value="#{msgs['TaskProperty.Resolution']}:"/>
+                            </p:column>
+                            <p:column colspan="2">
+                                <p:outputLabel
+                                        value="#{performanceAppraisalsBean.task.resolution.name}"/>
+                            </p:column>
+                        </p:row>
+
+                        <!-- POSITION ROW -->
+                        <p:row>
+                            <p:column>
+                                <p:outputLabel value="#{msgs['TaskProperty.Position']}"/>
+                            </p:column>
+                            <p:column colspan="2">
+                                <p:selectOneMenu id="position"
+                                                 style="color: #000000;width:40%;"
+                                                 effectSpeed="fast"
+                                                 value="#{performanceAppraisalsBean.task.position}"
+                                                 rendered="#{performanceAppraisalsBean.editMode}"
+                                                 converter="#{positionConverter}"
+                                                 required="true"
+                                                 requiredMessage="#{msgs['TaskValidation.emptyError']}">
+                                    <f:selectItem/>
+                                    <f:selectItems value="#{performanceAppraisalsBean.positions}"
+                                                   var="position"
+                                                   itemValue="#{position}"
+                                                   itemLabel="#{position.name}"/>
+                                    <p:ajax update="positionMessage" event="change"/>
+                                </p:selectOneMenu>
+                                <p:outputLabel
+                                        value="#{performanceAppraisalsBean.task.position.name}"
+                                        style="word-wrap:break-word;"
+                                        rendered="#{!performanceAppraisalsBean.editMode}"/>
+                                <p:message id="positionMessage" for="position" display="text"/>
+                            </p:column>
+                        </p:row>
+
+                        <!-- PRIORITY + LEVEL ROW -->
+                        <p:row>
+                            <p:column>
+                                <p:outputLabel value="#{msgs['TaskProperty.CandidateLevel']}"/>
+                            </p:column>
+                            <p:column colspan="2">
+                                <p:selectOneMenu id="candidateLevel"
+                                                 style="color: #000000;width:40%;"
+                                                 effectSpeed="fast"
+                                                 value="#{performanceAppraisalsBean.task.candidateLevel}"
+                                                 rendered="#{performanceAppraisalsBean.editMode}"
+                                                 converter="#{candidateLevelConverter}"
+                                                 required="true"
+                                                 requiredMessage="#{msgs['TaskValidation.emptyError']}">
+                                    <f:selectItem/>
+                                    <f:selectItems value="#{performanceAppraisalsBean.candidateLevels}"
+                                                   var="candidateLevel"
+                                                   itemValue="#{candidateLevel}"
+                                                   itemLabel="#{candidateLevel.name}"/>
+                                    <p:ajax update="candidateLevelMessage" event="change"/>
+                                </p:selectOneMenu>
+                                <p:outputLabel
+                                        value="#{performanceAppraisalsBean.task.candidateLevel.name}"
+                                        style="word-wrap:break-word;"
+                                        rendered="#{!performanceAppraisalsBean.editMode}"/>
+                                <p:message id="candidateLevelMessage" for="candidateLevel" display="text"/>
+                            </p:column>
+                        </p:row>
+                    </p:panelGrid>
+                    <!-- Questions-->
+
+
+                    <p:row>
+                        <p:column colspan="3">
+                            <ui:include src="PerformanceAppraisalsTabs.xhtml"/>
+                        </p:column>
+                    </p:row>
+
+                    <!-- Comments pannel grid -->
+
+                    <p:panelGrid id="commentsPanelGrid"
+                                 styleClass="noBorder"
+                                 rendered="#{!performanceAppraisalsBean.editMode}"
+                                 style="width: 100%; table-layout:fixed;">
+
+                        <!-- Comments area -->
+
+                        <p:row>
+                            <p:column colspan="6">
+                                <h4 class="headerWithLine">
+                                    <p:outputLabel value="#{msgs['TaskProperty.Comments']}"/>
+                                </h4>
+                            </p:column>
+                        </p:row>
+
+                        <!-- Show task comments area -->
+
+                        <p:row>
+                            <p:column colspan="6">
+                                <ui:repeat value="#{performanceAppraisalsBean.comments}" var="comm">
+                                    <h:outputText
+                                            style="width:100%;  word-wrap: break-word; font-style: italic; font-weight: bold;"
+                                            value="#{comm.user.fullName}"/>
+                                    <h:outputText
+                                            style="width:100%;  word-wrap: break-word; font-style: italic; font-weight: bold;"
+                                            value=" added a comment - "/>
+                                    <h:outputText
+                                            style="width:100%;  word-wrap: break-word; font-style: italic; font-weight: bold;"
+                                            value="#{comm.date}">
+                                        <f:convertDateTime pattern="dd/MMM/yy HH:mm" locale="en"/>
+                                    </h:outputText>
+                                    <br/>
+                                    <h:outputText style="width:100%;  word-wrap: break-word;"
+                                                  value="#{comm.comment}"/>
+                                    <br/>
+                                    <br/>
+                                </ui:repeat>
+                            </p:column>
+                        </p:row>
+
+                        <p:row>
+                            <p:column colspan="6">
+                                <p:commandButton value="#{msgs['DialogButton.Comment']}"
+                                                 styleClass="hrcrm-button"
+                                                 actionListener="#{performanceAppraisalsBean.startAddComments()}"
+                                                 rendered="#{!performanceAppraisalsBean.enableAddComments}"
+                                                 update="performanceAppraisalsViewForm"/>
+                            </p:column>
+                        </p:row>
+
+                        <p:row>
+                            <p:column colspan="6">
+                                <p:message for="comments" id="commentsMessage" display="text"/>
+                                <p:inputTextarea id="comments" rows="9" cols="100"
+                                                 styleClass="textareaCreate"
+                                                 style="width:100%;"
+                                                 autoResize="false"
+                                                 value="#{performanceAppraisalsBean.commentValue}"
+                                                 rendered="#{performanceAppraisalsBean.enableAddComments}">
+                                    <p:ajax update="commentsMessage" event="keyup"/>
+                                    <f:validator validatorId="commentsValidator"/>
+                                </p:inputTextarea>
+                            </p:column>
+                        </p:row>
+
+                        <p:row>
+                            <p:column colspan="6">
+                                <p:commandButton value="#{msgs['DialogButton.SaveComment']}"
+                                                 styleClass="hrcrm-button-long"
+                                                 rendered="#{performanceAppraisalsBean.enableAddComments}"
+                                                 actionListener="#{performanceAppraisalsBean.addCommentFromArea}"
+                                                 update="performanceAppraisalsViewForm"/>
+                                <p:spacer width="20"/>
+                                <p:commandButton value="#{msgs['DialogButton.Cancel']}"
+                                                 styleClass="hrcrm-button"
+                                                 rendered="#{performanceAppraisalsBean.enableAddComments}"
+                                                 actionListener="#{performanceAppraisalsBean.commentCancel()}"
+                                                 update="performanceAppraisalsViewForm"
+                                                 immediate="true"/>
+                            </p:column>
+                        </p:row>
+
+
+                    </p:panelGrid>
+
+                    <!-- End Comments Pannel grid -->
+                </p:column>
+
+
+                <p:column style="vertical-align: top">
+                    <p:panelGrid id="rightPanelGrid" styleClass="noBorder"
+                                 style="width: 100%;">
+                        <p:row>
+                            <p:column colspan="4">
+                                <h4 class="headerWithLine">
+                                    <p:outputLabel value="#{msgs['TaskProperty.People']}"/>
+                                </h4>
+                            </p:column>
+                        </p:row>
+                        <p:row>
+                            <p:column>
+                                <p:outputLabel id="assignee-label"
+                                               value="#{msgs['TaskProperty.Assignee']}:"/>
+                            </p:column>
+                            <p:column colspan="3">
+                                <p:outputLabel value="#{performanceAppraisalsBean.assigneeFullName}"
+                                               style="word-wrap:break-word;"
+                                               rendered="#{!performanceAppraisalsBean.editMode or not empty performanceAppraisalsBean.task.assignee}"/>
+                                <p:selectOneMenu id="assignee"
+                                                 value="#{performanceAppraisalsBean.task.assignee}"
+                                                 effectSpeed="fast"
+                                                 required="false"
+                                                 converter="#{userConverter}"
+                                                 style="width:90%;"
+                                                 rendered="#{performanceAppraisalsBean.editMode and empty performanceAppraisalsBean.task.assignee}"
+                                                 filter="true">
+                                    <f:selectItem itemLabel="#{msgs['Popup.SetAssigneeUnassigned']}"/>
+                                    <f:selectItems
+                                            value="#{performanceAppraisalsBean.users}"
+                                            var="userA"
+                                            itemLabel="#{userA.fullName}"
+                                            itemValue="#{userA}"/>
+                                </p:selectOneMenu>
+                            </p:column>
+                        </p:row>
+                        <p:row>
+                            <p:column style="vertical-align: top">
+                                <p:outputLabel id="reviewer-label"
+                                               value="#{msgs['TaskProperty.Reviewer']}:"/>
+                            </p:column>
+                            <p:column colspan="3">
+
+                                <!-- disabled="false"-->
+                                <p:commandLink disabled="false"
+                                               id="addreviewerl"
+                                               styleClass="hrcrm-link"
+                                               onclick="PF('setr1').show();"
+                                               type="button"
+                                               update=":reviewerDialogForm:reviwers">
+                                    <h:outputText value="#{msgs['TaskProperty.AddReviewerLink']}"/>
+                                </p:commandLink>
+
+                                <ui:repeat value="#{performanceAppraisalsBean.reviewers}" var="reviewer">
+                                    <br/> <p:outputLabel value="#{reviewer.fullName}"/>
+                                </ui:repeat>
+                            </p:column>
+                        </p:row>
+                        <p:row>
+                            <p:column>
+                                <p:outputLabel id="creator-label" value="#{msgs['TaskProperty.Creator']}:"/>
+                            </p:column>
+                            <p:column colspan="3">
+                                <p:outputLabel value="#{performanceAppraisalsBean.task.creator.fullName}">
+                                </p:outputLabel>
+                            </p:column>
+                        </p:row>
+
+                        <p:row>
+                            <p:column colspan="4">
+                                <h4 class="headerWithLine">
+                                    <p:outputLabel value="#{msgs['TaskProperty.Dates']}"/>
+                                </h4>
+                            </p:column>
+                        </p:row>
+                        <p:row>
+                            <p:column colspan="2" style="width: 50%">
+                                <p:outputLabel id="due-date" value="#{msgs['TaskProperty.DueDate']}:"/>
+                            </p:column>
+
+                            <p:column colspan="2" style="width: 50%">
+                                <p:outputLabel value="#{performanceAppraisalsBean.task.dueDate}"
+                                               rendered="#{!performanceAppraisalsBean.editMode}">
+                                    <f:convertDateTime pattern="MM/dd/yyyy"/>
+                                </p:outputLabel>
+                                <p:calendar id="due"
+                                            onkeypress="return event.keyCode != 13;"
+                                            effectSpeed="fast"
+                                            rendered="#{performanceAppraisalsBean.editMode}"
+                                            value="#{performanceAppraisalsBean.task.dueDate}"
+                                            placeholder="MM/DD/YYYY"
+                                            pattern="MM/dd/yyyy"
+                                            mask="99/99/9999"
+                                            converterMessage="#{msgs['TaskValidation.dateError']}"
+                                            validatorMessage="#{msgs['TaskValidation.dateValidationError']}"
+                                            showOn="button"
+                                            size="10"
+                                            mindate="#{performanceAppraisalsBean.task.creationDate}">
+                                    <f:validator validatorId="futureDateValidator"/>
+                                    <p:ajax update="calendarMessage" event="change"/>
+                                    <p:ajax update="calendarMessage" event="dateSelect"/>
+                                    <f:attribute name="date"
+                                                 value="#{performanceAppraisalsBean.task.creationDate}"/>
+                                </p:calendar>
+                            </p:column>
+                        </p:row>
+                        <p:row>
+                            <p:column colspan="4" style="height: 0 !important; padding: 0 !important">
+                                <p:message for="due" id="calendarMessage" display="text"/>
+                            </p:column>
+                        </p:row>
+                        <p:row>
+                            <p:column colspan="2">
+                                <p:outputLabel id="created" value="#{msgs['TaskProperty.CreationDate']}:"/>
+                            </p:column>
+                            <p:column colspan="2">
+                                <p:outputLabel value="#{performanceAppraisalsBean.task.creationDate}">
+                                    <f:convertDateTime pattern="MM/dd/yyyy"/>
+                                </p:outputLabel>
+                            </p:column>
+                        </p:row>
+                        <p:row>
+                            <p:column colspan="2">
+                                <p:outputLabel id="updeted"
+                                               value="#{msgs['TaskProperty.LastUpdatedDate']}:"/>
+                            </p:column>
+                            <p:column colspan="2">
+                                <p:outputLabel id="updated"
+                                               value="#{performanceAppraisalsBean.task.updateDate}">
+                                    <f:convertDateTime pattern="MM/dd/yyyy"/>
+                                </p:outputLabel>
+                            </p:column>
+                        </p:row>
+                        <p:row>
+                            <p:column colspan="2">
+                                <p:outputLabel id="closed"
+                                               value="#{msgs['TaskProperty.ClosedDate']}:"/>
+                            </p:column>
+                            <p:column colspan="2">
+                                <p:outputLabel value="#{performanceAppraisalsBean.task.closedDate}">
+                                    <f:convertDateTime pattern="MM/dd/yyyy"/>
+                                </p:outputLabel>
+                            </p:column>
+                        </p:row>
+
+                    </p:panelGrid>
+                </p:column>
+            </p:row>
+        </p:panelGrid>
+
+    </h:form>
+
+    <p:confirmDialog message="#{msgs['Popup.CancelEdit']}"
+                     widgetVar="dlg1" closable="false" severity="alert">
+        <h:panelGroup layout="block" style="text-align: right">
+            <h:form>
+                <p:commandButton value="#{msgs['DialogButton.Ok']}"
+                                 styleClass="hrcrm-button"
+                                 oncomplete="PF('dlg1').hide();"
+                                 actionListener="#{performanceAppraisalsBean.cancelEdit()}"
+                                 update=":performanceAppraisalsViewForm"/>
+                <p:spacer width="20"/>
+
+                <p:commandButton value="#{msgs['DialogButton.Cancel']}" type="button"
+                                 styleClass="hrcrm-button" onclick="PF('dlg1').hide();"/>
+            </h:form>
+        </h:panelGroup>
+    </p:confirmDialog>
+
+    <p:confirmDialog id="perfseta1"
+                     widgetVar="seta1"
+                     closable="false">
+        <f:facet name="header">
+            <p:panelGrid styleClass="noBorder" style="width: 100%;">
+                <p:row>
+                    <p:column>
+                        <p:outputLabel style="font-size:14px;" value="#{msgs['Popup.SetAssignee']}"/>
+                    </p:column>
+                    <p:column style="text-align:right; vertical-align:top;">
+                        <p:commandLink class="hrcrm-close" onclick="PF('seta2').show();">
+                            <span class="ui-icon ui-icon-closethick"/>
+                        </p:commandLink>
+                    </p:column>
+                </p:row>
+            </p:panelGrid>
+        </f:facet>
+        <f:facet name="message">
+            <h:form>
+                <p:panelGrid styleClass="noBorder" style="height:5em; vertical-align:top;">
+                    <p:row>
+                        <p:column style="width:9em;">
+                            <p:outputLabel value="#{msgs['TaskProperty.Assignee']}:"/>
+                        </p:column>
+                        <p:column style="width:18em;">
+                            <p:selectOneMenu id="setaassignee"
+                                             value="#{performanceAppraisalsBean.assigneeSet}"
+                                             effectSpeed="fast"
+                                             required="false"
+                                             converter="#{userConverter}"
+                                             style="width:90%;"
+                                             filter="true">
+                                <f:selectItem itemLabel="#{msgs['Popup.SetAssigneeUnassigned']}"/>
+                                <f:selectItems
+                                        value="#{performanceAppraisalsBean.users}"
+                                        var="userA"
+                                        itemLabel="#{userA.fullName}"
+                                        itemValue="#{userA}"/>
+                            </p:selectOneMenu>
+                        </p:column>
+                        <p:column style="width:9em;">
+                        </p:column>
+                    </p:row>
+                </p:panelGrid>
+                <h:panelGroup layout="block" style="text-align: right">
+                    <p:commandButton value="#{msgs['DialogButton.Assign']}"
+                                     styleClass="hrcrm-button"
+                                     actionListener="#{performanceAppraisalsBean.assigneeUpdate()}"
+                                     oncomplete="PF('seta1').hide();"
+                                     update=":performanceAppraisalsViewForm">
+                    </p:commandButton>
+                    <p:spacer width="20"/>
+                    <p:commandButton value="#{msgs['DialogButton.Cancel']}" type="button"
+                                     styleClass="hrcrm-button"
+                                     onclick="PF('seta2').show();"/>
+                </h:panelGroup>
+            </h:form>
+        </f:facet>
+    </p:confirmDialog>
+
+    <p:confirmDialog message="#{msgs['Popup.CancelSetAssignee']}"
+                     widgetVar="seta2" closable="false" severity="alert">
+        <h:panelGroup layout="block" style="text-align: right">
+            <h:form>
+                <p:commandButton value="#{msgs['DialogButton.Ok']}"
+                                 styleClass="hrcrm-button"
+                                 onclick="PF('seta2').hide();"
+                                 oncomplete="PF('seta1').hide();"/>
+                <p:spacer width="20"/>
+
+                <p:commandButton value="#{msgs['DialogButton.Cancel']}" type="button"
+                                 styleClass="hrcrm-button" onclick="PF('seta2').hide();"/>
+            </h:form>
+        </h:panelGroup>
+    </p:confirmDialog>
+
+
+    <!-- add Reviewer dialog -->
+
+    <p:confirmDialog id="perfsetr1"
+                     widgetVar="setr1"
+                     closable="false">
+        <f:facet name="header">
+            <p:panelGrid styleClass="noBorder" style="width: 100%;">
+                <p:row>
+                    <p:column>
+                        <p:outputLabel style="font-size:14px;" value="#{msgs['Popup.SetReviewer']}"/>
+                    </p:column>
+                    <p:column style="text-align:right; vertical-align:top;">
+                        <p:commandLink class="hrcrm-close" onclick="PF('setr2').show();">
+                            <span class="ui-icon ui-icon-closethick"/>
+                        </p:commandLink>
+                    </p:column>
+                </p:row>
+            </p:panelGrid>
+        </f:facet>
+        <f:facet name="message">
+            <h:form id="reviewerDialogForm">
+                <p:panelGrid id="reviewerDialog" styleClass="noBorder" style="height:5em; vertical-align:top;">
+                    <p:row>
+                        <p:column style="width:9em;">
+                            <p:outputLabel value="#{msgs['TaskProperty.Reviewer']}:"/>
+                        </p:column>
+                        <p:column style="width:18em;">
+
+                            <p:selectOneMenu id="reviwers" value="#{performanceAppraisalsBean.newReviewer}"
+                                             effectSpeed="fast"
+                                             required="false"
+                                             validator="#{performanceAppraisalsBean.validateMaxReviewers}"
+                                             converter="#{userConverter}"
+                                             style="width:200px;"
+                                             filter="true">
+                                <f:selectItem itemLabel="#{msgs['Popup.SetAssigneeUnassigned']}"/>
+                                <f:selectItems
+                                        value="#{performanceAppraisalsBean.users}"
+                                        var="userA"
+                                        itemLabel="#{userA.fullName}"
+                                        itemValue="#{userA}"/>
+                                <p:ajax event="change" update="descriptionMessage"/>
+                            </p:selectOneMenu>
+                        </p:column>
+                        <p:column style="width:9em;">
+                        </p:column>
+                    </p:row>
+
+                    <p:row>
+                        <p:column style="width:9em;">
+                        </p:column>
+                        <p:column style="width:18em; height: 2em;">
+                            <p:message for="reviwers" id="descriptionMessage" display="text"/>
+                        </p:column>
+                        <p:column style="width:9em;">
+                        </p:column>
+                    </p:row>
+
+
+                </p:panelGrid>
+                <h:panelGroup layout="block" style="text-align: right">
+
+
+                    <p:commandButton value="#{msgs['DialogButton.SetReviewer']}"
+                                     styleClass="hrcrm-button-long"
+                                     actionListener="#{performanceAppraisalsBean.addReviewer()}"
+                                     update=":performanceAppraisalsViewForm">
+                    </p:commandButton>
+                    <p:spacer width="20"/>
+                    <p:commandButton value="#{msgs['DialogButton.Cancel']}" type="button"
+                                     styleClass="hrcrm-button"
+                                     onclick="PF('setr2').show();"/>
+
+                </h:panelGroup>
+            </h:form>
+        </f:facet>
+        <p:spacer width="40"/>
+    </p:confirmDialog>
+
+    <p:confirmDialog message="#{msgs['Popup.CancelSetReviewer']}"
+                     widgetVar="setr2" closable="false" severity="alert">
+        <h:panelGroup layout="block" style="text-align: right">
+            <h:form>
+                <p:commandButton value="#{msgs['DialogButton.Ok']}"
+                                 styleClass="hrcrm-button"
+                                 onclick="PF('setr2').hide();"
+                                 oncomplete="PF('setr1').hide();"/>
+                <p:spacer width="20"/>
+
+                <p:commandButton value="#{msgs['DialogButton.Cancel']}" type="button"
+                                 styleClass="hrcrm-button" onclick="PF('setr2').hide();"/>
+            </h:form>
+        </h:panelGroup>
+    </p:confirmDialog>
+
+
+    <!-- Resolution Issue popup menu -->
+
+    <p:confirmDialog id="rezolutionPA"
+                     widgetVar="rezol1"
+                     closable="false"
+                     style="width: 650px!important;">
+        <f:facet name="header">
+            <p:panelGrid styleClass="noBorder" style="width: 620px;">
+
+                <!-- Window header -->
+
+                <p:row>
+                    <p:column>
+                        <p:outputLabel style="font-size:14px;" value="#{msgs['Popup.SetResolution']}"/>
+                    </p:column>
+                    <p:column style="text-align:right; vertical-align:middle;">
+                        <p:commandLink class="hrcrm-close" onclick="PF('rezol2').show();">
+                            <span class="ui-icon ui-icon-closethick"/>
+                        </p:commandLink>
+                    </p:column>
+                </p:row>
+            </p:panelGrid>
+        </f:facet>
+        <f:facet name="message">
+            <h:form>
+                <p:panelGrid styleClass="noBorder" style="height:5em;
+                        vertical-align:top;
+                        width: 600px!important;">
+
+                    <!-- Resolution row -->
+
+                    <p:row>
+                        <p:column>
+                            <p:outputLabel style="width:120px!important; margin-top: 8px; margin-bottom: 8px"
+                                           value="#{msgs['TaskProperty.SetResolution']}:"/>
+                        </p:column>
+                        <p:column style="width:18em;">
+                            <p:selectOneMenu id="setrresolution"
+                                             value="#{performanceAppraisalsBean.resolutionSet}"
+                                             effectSpeed="fast"
+                                             required="true"
+                                             requiredMessage="#{msgs['TaskValidation.emptyError']}"
+                                             converter="#{resolutionConverter}"
+                                             style="width:226px;">
+                                <f:selectItem itemDisabled="true"/>
+                                <f:selectItems
+                                        value="#{performanceAppraisalsBean.resolutionValue}"
+                                        var="rezol"
+                                        itemLabel="#{rezol.name}"
+                                        itemValue="#{rezol}"/>
+                                <p:ajax update="setrresolutionMessage" event="change"/>
+                            </p:selectOneMenu>
+                            <p:message id="setrresolutionMessage" for="setrresolution" display="text"/>
+                        </p:column>
+                        <p:column style="width:9em;">
+                        </p:column>
+                    </p:row>
+
+
+                    <!-- Assignee Row -->
+
+                    <p:row>
+                        <p:column style="width:9em;">
+                            <p:outputLabel style="width:120px;margin-top: 8px; margin-bottom: 8px"
+                                           value="#{msgs['TaskProperty.Assignee']}:"/>
+                        </p:column>
+                        <p:column style="width:18em;">
+                            <p:outputLabel value="#{performanceAppraisalsBean.assigneeFullName}"
+                                           style="word-wrap:break-word;"
+                                           rendered="#{not empty performanceAppraisalsBean.task.assignee}"/>
+                            <p:selectOneMenu id="setrassignee"
+                                             value="#{performanceAppraisalsBean.task.assignee}"
+                                             effectSpeed="fast"
+                                             required="false"
+                                             converter="#{userConverter}"
+                                             style="width:226px;"
+                                             filter="true"
+                                             rendered="#{empty performanceAppraisalsBean.task.assignee}">
+                                <f:selectItem itemLabel="#{msgs['Popup.SetAssigneeUnassigned']}"/>
+                                <f:selectItems
+                                        value="#{performanceAppraisalsBean.users}"
+                                        var="userA"
+                                        itemLabel="#{userA.fullName}"
+                                        itemValue="#{userA}"/>
+                            </p:selectOneMenu>
+                        </p:column>
+                        <p:column style="width:9em;">
+                        </p:column>
+                    </p:row>
+
+                    <!-- Comment row -->
+
+                    <p:row>
+                        <p:column style="vertical-align: top;">
+                            <p:outputLabel style="width:120px;margin-top: 8px; margin-bottom: 8px"
+                                           value="#{msgs['TaskProperty.Comment']}:"/>
+                        </p:column>
+                        <p:column style="width:18em;">
+                            ` <p:message for="commentResolveIssue" id="commentsMessageResolveIssue" display="text"/>
+                            <p:inputTextarea id="commentResolveIssue" rows="9" cols="100"
+                                             value="#{performanceAppraisalsBean.commentValue}"
+                                             styleClass="textareaCreate"
+                                             style="width:460px; height:150px"
+                                             autoResize="false">
+                                <p:ajax update="commentsMessageResolveIssue" event="keyup"/>
+                                <f:validator validatorId="commentsValidator"/>
+                            </p:inputTextarea>
+                        </p:column>
+                    </p:row>
+
+                </p:panelGrid>
+                <h:panelGroup layout="block" style="text-align: right; padding-top: 10px; padding-right: 20px;">
+                    <p:commandButton value="#{msgs['DialogButton.Resolve']}"
+                                     styleClass="hrcrm-button"
+                                     action="#{performanceAppraisalsBean.resolutionUpdate()}"
+                                     oncomplete="if (!args.validationFailed) PF('rezol1').hide();"
+                                     update=":performanceAppraisalsViewForm setrresolutionMessage">
+                    </p:commandButton>
+                    <p:spacer width="20"/>
+                    <p:commandButton value="#{msgs['DialogButton.Cancel']}" type="button"
+                                     styleClass="hrcrm-button"
+                                     onclick="PF('rezol2').show();"/>
+                </h:panelGroup>
+            </h:form>
+        </f:facet>
+    </p:confirmDialog>
+
+    <p:confirmDialog message="#{msgs['Popup.CancelSetAssignee']}"
+                     widgetVar="rezol2" closable="false" severity="alert">
+        <h:panelGroup layout="block" style="text-align: right">
+            <h:form>
+                <p:commandButton value="#{msgs['DialogButton.Ok']}"
+                                 styleClass="hrcrm-button"
+                                 action="#{performanceAppraisalsBean.resetSets()}"
+                                 onclick="PF('rezol2').hide();"
+                                 oncomplete="PF('rezol1').hide();"/>
+                <p:spacer width="20"/>
+
+                <p:commandButton value="#{msgs['DialogButton.Cancel']}" type="button"
+                                 styleClass="hrcrm-button" onclick="PF('rezol2').hide();"/>
+            </h:form>
+        </h:panelGroup>
+    </p:confirmDialog>
+
+    <p:confirmDialog id="addGoal"
+                     widgetVar="addGoalDlg"
+                     closable="false">
+        <f:facet name="header">
+            <p:panelGrid styleClass="noBorder" style="width: 100%;">
+                <p:row>
+                    <p:column>
+                        <p:outputLabel style="font-size:14px;" value="#{msgs['DialogButton.SetGoal']}"/>
+                    </p:column>
+                    <p:column style="text-align:right; vertical-align:top;">
+                        <p:commandLink class="hrcrm-close" onclick="PF('addGoalCancelDlg').show();">
+                            <span class="ui-icon ui-icon-closethick"/>
+                        </p:commandLink>
+                    </p:column>
+                </p:row>
+            </p:panelGrid>
+        </f:facet>
+        <f:facet name="message">
+            <h:form id="addGoalForm">
+                <p:panelGrid styleClass="noBorder"
+                             style="height:10em; width: 40em; vertical-align:top;table-layout:fixed;">
+
+                    <p:row>
+                        <p:column style="width:10em;">
+                            <p:outputLabel value="#{msgs['DialogButton.AddGoal']}"/>
+                        </p:column>
+                        <p:column style="width: 30em">
+                            <p:inputTextarea id="newGoal"
+                                             autoResize="false"
+                                             style="width:30em;height: 10em"
+                                             value="#{performanceAppraisalsBean.newGoal}">
+                                <p:ajax update="newGoalAnswerMessage" event="keyup"/>
+                                <f:validator validatorId="goalValidator"/>
+                            </p:inputTextarea>
+                        </p:column>
+                    </p:row>
+                    <p:row>
+                        <p:column colspan="2">
+                            <p:message for="newGoal" id="newGoalAnswerMessage" display="text"/>
+                        </p:column>
+                    </p:row>
+                </p:panelGrid>
+                <h:panelGroup layout="block" style="text-align: right"><br/>
+
+                    <p:commandButton value="#{msgs['DialogButton.Set']}"
+                                     styleClass="hrcrm-button"
+                                     actionListener="#{performanceAppraisalsBean.addGoal}"
+                                     update=":performanceAppraisalsViewForm:PATabs, newGoalAnswerMessage"/>
+
+                    <p:spacer width="20"/>
+                    <p:commandButton value="#{msgs['DialogButton.Cancel']}" type="button"
+                                     styleClass="hrcrm-button"
+                                     onclick="PF('addGoalCancelDlg').show();"/>
+
+                </h:panelGroup>
+            </h:form>
+        </f:facet>
+    </p:confirmDialog>
+
+    <p:confirmDialog message="#{msgs['Popup.CancelAddGoal']}"
+                     widgetVar="addGoalCancelDlg" closable="false" severity="alert">
+        <h:panelGroup layout="block" style="text-align: right">
+            <h:form>
+                <p:commandButton value="#{msgs['DialogButton.Ok']}"
+                                 styleClass="hrcrm-button"
+                                 onclick="PF('addGoalCancelDlg').hide();"
+                                 actionListener="#{performanceAppraisalsBean.setNewGoal(null)}"
+                                 update=":performanceAppraisalsViewForm"
+                                 oncomplete="PF('addGoalDlg').hide();"/>
+                <p:spacer width="20"/>
+
+                <p:commandButton value="#{msgs['DialogButton.Cancel']}"
+                                 type="button"
+                                 styleClass="hrcrm-button"
+                                 onclick="PF('addGoalCancelDlg').hide();"
+
+                        />
+            </h:form>
+        </h:panelGroup>
+    </p:confirmDialog>
+
+</ui:composition>
+
+

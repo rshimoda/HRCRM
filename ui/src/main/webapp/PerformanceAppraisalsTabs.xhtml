@@ -1,0 +1,145 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:c="http://java.sun.com/jsp/jstl/core">
+
+
+    <p:tabView id="PATabs" styleClass="paTabs" dynamic="true">
+        <p:tab title="#{msgs['TaskProperty.Questions']}" id="answersTab">
+            <ui:repeat value="#{performanceAppraisalsBean.detailsList}" var="detail">
+                <h4>
+                    <h:outputText style="width:100%;  word-wrap: break-word;"
+                                  value="#{detail.question.name}"/>
+                </h4>
+                <p:inputTextarea id="detailAnswer"
+                                 rows="1" cols="92"
+                                 style="width:100%; height: auto"
+                                 value="#{detail.answer}"
+                                 rendered="#{performanceAppraisalsBean.userCanAnswer}">
+                    <p:ajax update="detailAnswerMessage" event="keyup"/>
+                    <f:validator validatorId="summaryValidator"/>
+                </p:inputTextarea>
+                <p:message for="detailAnswer" id="detailAnswerMessage" display="text"/>
+            </ui:repeat>
+
+            <p/>
+            <p:commandButton value="#{msgs['DialogButton.SaveAnswers']}"
+                             id="answersTabButton"
+                             style="width: 9em"
+                             actionListener="#{performanceAppraisalsBean.saveDetailAnswers()}"
+                             styleClass="hrcrm-button"
+                             rendered="#{!empty performanceAppraisalsBean.detailsList and performanceAppraisalsBean.userCanAnswer}"/>
+        </p:tab>
+
+        <p:tab title="#{msgs['TaskProperty.Goals']}" id="goalsTab">
+            <p:commandButton id="goalsTabButton1"
+                             value="#{msgs['DialogButton.AddGoal']}"
+                             styleClass="hrcrm-button"
+                             oncomplete="PF('addGoalDlg').show();"
+                             rendered="#{performanceAppraisalsBean.userCanAnswer}"
+                             update=":addGoalForm"/>
+
+            <p/>
+            <ui:repeat varStatus="index" value="#{performanceAppraisalsBean.goalsList}" var="goal">
+                <h4><h:outputText style="width:100%;  word-wrap: break-word;"
+                                  value="#{index.index+1}. #{goal.goal}"/></h4>
+                <p:inputTextarea id="goalAnswer"
+                                 rows="1" cols="92"
+                                 style="width:100%; height: auto"
+                                 value="#{goal.goalAnswer}"
+                                 rendered="#{performanceAppraisalsBean.userCanAnswer}">
+                    <p:ajax update="goalAnswerMessage" event="keyup"/>
+                    <f:validator validatorId="summaryValidator"/>
+                </p:inputTextarea>
+                <p:message for="goalAnswer" id="goalAnswerMessage" display="text"/>
+            </ui:repeat>
+
+            <p/>
+            <p:commandButton id="goalsTabButton2"
+                             value="#{msgs['DialogButton.SaveAnswers']}" style="width: 9em"
+                             action="#{performanceAppraisalsBean.saveGoalAnswers()}"
+                             styleClass="hrcrm-button"
+                             rendered="#{!empty performanceAppraisalsBean.goalsList and performanceAppraisalsBean.userCanAnswer}"/>
+        </p:tab>
+        <p:tab rendered="#{performanceAppraisalsBean.viewCompareResults}"
+               title="#{msgs['TaskProperty.CompareResults']}" id="compareTab">
+
+            <!-- Compare Questions Table -->
+
+            <h:outputText value="#{msgs['TaskProperty.Questions']}"/>
+
+            <p:panelGrid>
+                <p:row>
+                    <p:column style="width:150px; padding-right: 0px!important;">
+                        <p:dataTable styleClass="datatable-borders" var="results" rowIndexVar="rowIndex"
+                                     value="#{performanceAppraisalsBean.detailsListAssignee}">
+                            <p:column style="width:40px;" headerText="#">
+                                #{rowIndex+1}
+                            </p:column>
+                            <p:column style="width: 110px!important;" headerText="#{msgs['TaskProperty.Questions']}">
+                                <h:outputText id="valueQ" value="#{results.question.name}"
+                                              title="#{results.question.name}"/>
+                                <p:tooltip for="valueQ" styleClass="hover-over-cut" trackMouse="true"/>
+                            </p:column>
+                        </p:dataTable>
+                    </p:column>
+
+                    <p:column style="padding-left: 0px!important;">
+                        <p:dataTable styleClass="datatable-borders"
+                                     value="#{performanceAppraisalsBean.contestListDetail}" var="listDetails">
+                            <p:columns styleClass="singleLine" value="#{performanceAppraisalsBean.assigneeReviewers}"
+                                       var="reviewers" columnIndexVar="colIndex">
+                                <f:facet name="header">
+                                    #{reviewers.fullName}
+                                </f:facet>
+                                <h:outputText id="valueQA" value="#{listDetails[colIndex].value}"
+                                              title="#{listDetails[colIndex].value}"/>
+                                <p:tooltip for="valueQA" styleClass="hover-over-cut" trackMouse="true"/>
+                            </p:columns>
+                        </p:dataTable>
+                    </p:column>
+                </p:row>
+            </p:panelGrid>
+
+
+            <!-- Compare Goals table -->
+
+            <h:outputText value="#{msgs['TaskProperty.Goals']}"/>
+
+            <p:panelGrid>
+                <p:row>
+                    <p:column style="width:150px; padding-right: 0px!important;">
+                        <p:dataTable styleClass="datatable-borders" var="goals" rowIndexVar="rowIndex"
+                                     value="#{performanceAppraisalsBean.goalsListAssignee}">
+                            <p:column style="width:40px;" headerText="#">
+                                #{rowIndex+1}
+                            </p:column>
+                            <p:column style="width: 110px!important;" headerText="#{msgs['TaskProperty.Goals']}">
+                                <h:outputText id="valueG" value="#{goals.goal}"
+                                              title="#{goals.goal}"/>
+                                <p:tooltip for="valueG" styleClass="hover-over-cut" trackMouse="true"/>
+                            </p:column>
+                        </p:dataTable>
+                    </p:column>
+
+                    <p:column style="padding-left: 0px!important;">
+                        <p:dataTable styleClass="datatable-borders" value="#{performanceAppraisalsBean.contestList}"
+                                     var="list">
+                            <p:columns styleClass="singleLine" value="#{performanceAppraisalsBean.assigneeReviewers}"
+                                       var="reviewers" columnIndexVar="colIndex">
+                                <f:facet name="header">
+                                    #{reviewers.fullName}
+                                </f:facet>
+                                <h:outputText id="valueGA" value="#{list[colIndex].value}"
+                                              title="#{list[colIndex].value}"/>
+                                <p:tooltip for="valueGA" styleClass="hover-over-cut" trackMouse="true"/>
+                            </p:columns>
+                        </p:dataTable>
+                    </p:column>
+                </p:row>
+            </p:panelGrid>
+        </p:tab>
+    </p:tabView>
+</ui:composition>

@@ -1,0 +1,31 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui">
+    <h:form>
+        <p:dataTable
+                id="activeRecruitmentsTable"
+                value="#{activeRecruitments.activeRecruitment}"
+                var="Recruitment"
+                rowKey="#{Recruitment.id}"
+                emptyMessage="No Active Vacancies">
+            <p:column selectionMode="multiple" style="width:40px;text-align:center">
+            </p:column>
+            <p:column headerText="ID" filterBy="" filterMatchMode="contains">
+                <h:outputText value="#{Recruitment.id}"/>
+            </p:column>
+            <p:column headerText="Summary">
+                <h:outputText value="#{Recruitment.summary}"/>
+            </p:column>
+            <p:column headerText="Position">
+                <h:outputText value="#{Recruitment.position}"/>
+            </p:column>
+            <p:column headerText="Level">
+                <h:outputText value="#{Recruitment.candidateLevel}"/>
+            </p:column>
+        </p:dataTable>
+        <p:commandButton value="Cancel" style="float: right"/>
+        <p:commandButton value="Link" style="float: right"/>
+    </h:form>
+</ui:composition>

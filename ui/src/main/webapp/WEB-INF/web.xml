@@ -7,8 +7,45 @@
 
     <display-name>HRCRM</display-name>
 
+    <!--<context-param>-->
+    <!--<param-name>javax.faces.FACELETS_LIBRARIES</param-name>-->
+    <!--<param-value>/WEB-INF/springsecurity.taglib.xml</param-value>-->
+    <!--</context-param>-->
+    <context-param>
+        <param-name>contextConfigLocation</param-name>
+        <param-value>
+            /WEB-INF/applicationContext.xml
+            /WEB-INF/applicationContext-security.xml
+        </param-value>
+    </context-param>
+
+    <!--<context-param>-->
+    <!--<param-name>log4jConfigLocation</param-name>-->
+    <!--<param-value>classpath:${project.artifactId}-log4j.properties</param-value>-->
+    <!--</context-param>-->
+    <!--<filter>-->
+    <!--<filter-name>filterChainProxy</filter-name>-->
+    <!--<filter-class>org.springframework.web.filter.DelegatingFilterProxy</filter-class>-->
+    <!--</filter>-->
+    <!--<filter-mapping>-->
+    <!--<filter-name>filterChainProxy</filter-name>-->
+    <!--<url-pattern>/*</url-pattern>-->
+    <!--</filter-mapping>-->
+    <filter>
+        <filter-name>springSecurityFilterChain</filter-name>
+        <filter-class>
+            org.springframework.web.filter.DelegatingFilterProxy
+        </filter-class>
+    </filter>
+
+    <filter-mapping>
+        <filter-name>springSecurityFilterChain</filter-name>
+        <url-pattern>/*</url-pattern>
+        <dispatcher>FORWARD</dispatcher>
+        <dispatcher>REQUEST</dispatcher>
+    </filter-mapping>
     <welcome-file-list>
-        <welcome-file>index.xhtml</welcome-file>
+        <welcome-file>login/Login.xhtml</welcome-file>
     </welcome-file-list>
 
     <listener>
@@ -22,6 +59,11 @@
             org.springframework.web.context.request.RequestContextListener
         </listener-class>
     </listener>
+    <!--<listener>-->
+    <!--<listener-class>-->
+    <!--org.springframework.web.util.Log4jConfigListener-->
+    <!--</listener-class>-->
+    <!--</listener>-->
 
     <servlet>
         <servlet-name>Faces Servlet</servlet-name>
@@ -52,5 +94,24 @@
         <param-name>primefaces.THEME</param-name>
         <param-value>bootstrap</param-value>
     </context-param>
+
+    <!-- javax.faces.application.ViewExpiredException fix -->
+    <context-param>
+        <param-name>javax.faces.STATE_SAVING_METHOD</param-name>
+        <param-value>client</param-value>
+    </context-param>
+
+    <context-param>
+        <param-name>javax.faces.DATETIMECONVERTER_DEFAULT_TIMEZONE_IS_SYSTEM_TIMEZONE</param-name>
+        <param-value>true</param-value>
+    </context-param>
+    <filter>
+        <filter-name>UrlRewrite</filter-name>
+        <filter-class>com.eisgroup.hrcrm.ui.beans.UrlRewriteFilter</filter-class>
+    </filter>
+    <filter-mapping>
+        <filter-name>UrlRewrite</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
 
 </web-app>

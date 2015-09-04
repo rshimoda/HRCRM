@@ -1,0 +1,290 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.3.xsd http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
+
+    <changeSet id="sprint4-1-1" author="OStepanenko">
+        <sql>
+            UPDATE PROJECT SET NAME=(SUBSTR(NAME, 1, 20) || SUBSTR(ID, 1, 20)) WHERE LENGTH(NAME)>40;
+        </sql>
+    </changeSet>
+
+    <changeSet id="sprint4-4" author="MYaskov">
+        <update tableName="TASK">
+            <column name="PRIORITY" value="LOW"/>
+            <where>
+                TASK_TYPE = 'PerformanceAppraisal' AND (PRIORITY != 'LOW' OR PRIORITY IS NULL)
+            </where>
+        </update>
+        <update tableName="TASK">
+            <column name="PRIORITY" value="LOW"/>
+            <where>
+                TASK_TYPE = 'Candidate' AND (PRIORITY != 'LOW' OR PRIORITY IS NULL)
+            </where>
+        </update>
+    </changeSet>
+    <changeSet id="sprint4-3" author="MYaskov">
+        <update tableName="TASK">
+            <column name="COMPLEXITY_ID" value="1"/>
+            <where>
+                TASK_TYPE = 'PerformanceAppraisal' AND COMPLEXITY_ID != 1
+            </where>
+        </update>
+        <update tableName="TASK">
+            <column name="COMPLEXITY_ID" value="1"/>
+            <where>
+                TASK_TYPE = 'Candidate' AND COMPLEXITY_ID != 1
+            </where>
+        </update>
+    </changeSet>
+
+    <changeSet id="sprint4-5" author="OAlieksienko">
+        <addColumn tableName="TASK">
+            <column name="SOURCE" type="VARCHAR(255)"/>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="sprint4-6" author="MSizonenko">
+        <createTable tableName="CANDIDATE_RECRUITMENT">
+            <column autoIncrement="true" name="ID" type="BIGINT(19)"/>
+            <column name="CANDIDATE_ID" type="BIGINT(19)"/>
+            <column name="RECRUITMENT_ID" type="BIGINT(19)"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="sprint4-7" author="MSizonenko">
+        <addForeignKeyConstraint baseTableName="CANDIDATE_RECRUITMENT" baseColumnNames="RECRUITMENT_ID"
+                                 constraintName="RECR_FK"
+                                 referencedTableName="TASK"
+                                 referencedColumnNames="ID"/>
+    </changeSet>
+
+    <changeSet id="sprint4-8" author="MSizonenko">
+        <addForeignKeyConstraint baseTableName="CANDIDATE_RECRUITMENT" baseColumnNames="CANDIDATE_ID"
+                                 constraintName="CAND_ID"
+                                 referencedTableName="TASK"
+                                 referencedColumnNames="ID"/>
+    </changeSet>
+
+    <changeSet id="sprint4-HRCRM-1345-1" author="OStepurko">
+        <delete tableName="RESOLUTION">
+            <where>ID = 2</where>
+        </delete>
+    </changeSet>
+
+    <changeSet id="sprint4-HRCRM-1345-2" author="OStepurko">
+        <sql>
+            INSERT INTO RESOLUTION (ID, RESOLUTION) VALUES ((SELECT MAX(ID)+1 FROM RESOLUTION), 'On Hold');
+            INSERT INTO RESOLUTION (ID, RESOLUTION) VALUES ((SELECT MAX(ID)+1 FROM RESOLUTION), 'Declined');
+            INSERT INTO RESOLUTION (ID, RESOLUTION) VALUES ((SELECT MAX(ID)+1 FROM RESOLUTION), 'Under Review');
+            INSERT INTO RESOLUTION (ID, RESOLUTION) VALUES ((SELECT MAX(ID)+1 FROM RESOLUTION), 'Fixed');
+        </sql>
+    </changeSet>
+
+    <!-- Create COMMENT table -->
+    <changeSet author="OStepurko" id="sprint4-HRCRM-1345-3">
+        <createTable tableName="COMMENTS">
+            <column autoIncrement="true" name="ID" type="BIGINT(19)"/>
+            <column name="TSDATE" type="DATETIME"/>
+            <column name="TASK_ID" type="BIGINT(19)"/>
+            <column name="USER_ID" type="BIGINT(19)"/>
+            <column name="TASKCOMMENTS" type="VARCHAR(2048)"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet author="VKarpenko" id="sprint4-PAG-1">
+        <createTable tableName="PERFORMANCEAPPRAISALGOAL">
+            <column autoIncrement="true" name="ID" type="BIGINT(19)"/>
+            <column name="PERFORMANCEAPPRAISAL_ID" type="BIGINT(19)"/>
+            <column name="USER_ID" type="BIGINT(19)"/>
+            <column name="GOAL" type="VARCHAR(2048)"/>
+            <column name="GOALANSWER" type="VARCHAR(2048)"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet author="VKarpenko" id="sprint4-PAG-2">
+        <addForeignKeyConstraint baseColumnNames="PERFORMANCEAPPRAISAL_ID" baseTableName="PERFORMANCEAPPRAISALGOAL"
+                                 constraintName="PAGOAL_TASK" deferrable="false"
+                                 initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT"
+                                 referencedColumnNames="ID" referencedTableName="TASK"/>
+        <addForeignKeyConstraint baseColumnNames="USER_ID" baseTableName="PERFORMANCEAPPRAISALGOAL"
+                                 constraintName="PAGOAL_USER" deferrable="false"
+                                 initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT"
+                                 referencedColumnNames="ID" referencedTableName="USERS"/>
+    </changeSet>
+
+    <changeSet id="sprint4-9" author="OAlieksienko">
+        <sql>
+            INSERT INTO USERS (ID, FIRSTNAME, LASTNAME, EMAIL, LOGIN, PASSWORD, USER_PRIVILEGES) VALUES (0, 'Admin', '
+            ', 'admin@eisgroup.com', 'admin', 'admin', 'admin');
+        </sql>
+    </changeSet>
+
+    <changeSet author="OStepanenko" id="sprint4-HRCRM-1550-1">
+        <comment>All Project Names should be unique without dependence from Task type</comment>
+        <sql>
+            UPDATE PROJECT SET NAME=(SUBSTR(NAME, 1, 20) || SUBSTR(ID, 1, 20));
+        </sql>
+    </changeSet>
+
+    <changeSet author="OStepanenko" id="sprint4-HRCRM-1550-2">
+        <comment>Old constraint should be deleted</comment>
+        <dropUniqueConstraint tableName="PROJECT" constraintName="PRJCTUNIQUE"/>
+    </changeSet>
+
+    <changeSet author="OStepanenko" id="sprint4-HRCRM-1550-3">
+        <comment>TaskType column should be deleted</comment>
+        <dropColumn tableName="PROJECT" columnName="TASKTYPE"/>
+    </changeSet>
+
+    <changeSet author="OStepanenko" id="sprint4-HRCRM-1550-4">
+        <comment>New UNIQUE constraint should be created</comment>
+        <addUniqueConstraint columnNames="NAME" tableName="PROJECT" constraintName="PROJECTNAMEUNIQUE"/>
+    </changeSet>
+
+
+    <changeSet author="YNikonorov" id="sprint4-HRCRM-1718-4">
+        <createTable tableName="PERFORMANCEAPPRAISALUSER">
+            <column autoIncrement="true" name="ID" type="BIGINT(19)"/>
+            <column name="PERFORMANCEAPPRAISAL_ID" type="BIGINT(19)"/>
+            <column name="APPRAISALUSER_ID" type="BIGINT(19)"/>
+            <column name="ISREVIEWER" type="BOOLEAN" defaultValue="0"/>
+        </createTable>
+    </changeSet>
+
+
+    <changeSet author="YNikonorov" id="sprint4-HRCRM-1718-5">
+
+        <addForeignKeyConstraint baseColumnNames="PERFORMANCEAPPRAISAL_ID" baseTableName="PERFORMANCEAPPRAISALUSER"
+                                 constraintName="PAUSER_TASK" deferrable="false"
+                                 initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT"
+                                 referencedColumnNames="ID" referencedTableName="TASK"/>
+
+        <addForeignKeyConstraint baseColumnNames="APPRAISALUSER_ID" baseTableName="PERFORMANCEAPPRAISALUSER"
+                                 constraintName="PARUSER_USER" deferrable="false"
+                                 initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT"
+                                 referencedColumnNames="ID" referencedTableName="USERS"/>
+
+    </changeSet>
+
+    <changeSet author="VKarpenko" id="sprint4-HRCRM-1351-1">
+        <sql>
+            UPDATE TASK SET ASSIGNEE_ID=NULL WHERE TASK_TYPE='PerformanceAppraisal';
+        </sql>
+    </changeSet>
+
+    <changeSet author="OStepanenko" id="sprint4-HRCRM-1550-5-Empty-Project-Protect">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">SELECT COUNT(*) FROM PROJECT</sqlCheck>
+        </preConditions>
+        <comment>If table Project is empty, we have to add some value for another changeSets correct working</comment>
+        <sql>
+            INSERT INTO Project (id, name, isdeleted, isdefault) VALUES (1, 'ProjectTest', 1, 0);
+        </sql>
+    </changeSet>
+
+    <changeSet author="OStepanenko" id="sprint4-HRCRM-1550-5-1">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="1">SELECT COUNT(*) FROM PROJECT WHERE NAME='Project1'</sqlCheck>
+        </preConditions>
+        <comment>If name Project1 exists we just have to change its default value</comment>
+        <sql>
+            UPDATE PROJECT SET ISDEFAULT=1 WHERE NAME='Project1';
+        </sql>
+    </changeSet>
+
+    <changeSet author="OStepanenko" id="sprint4-HRCRM-1550-6-1">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">SELECT COUNT(*) FROM PROJECT WHERE NAME='Project1'</sqlCheck>
+        </preConditions>
+        <comment>If name Project1 not exists we have to add new value in table Project</comment>
+        <sql>
+            INSERT INTO Project (id, name, isdeleted, isdefault) VALUES ((SELECT 1+MAX(ID) FROM Project), 'Project1', 1,
+            1);
+        </sql>
+    </changeSet>
+
+    <changeSet author="OStepanenko" id="sprint4-HRCRM-1550-7-1">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="1">SELECT COUNT(*) FROM PROJECT WHERE NAME='Project2'</sqlCheck>
+        </preConditions>
+        <comment>If name Project2 exists we just have to change its default value</comment>
+        <sql>
+            UPDATE PROJECT SET ISDEFAULT=1 WHERE NAME='Project2';
+        </sql>
+    </changeSet>
+
+    <changeSet author="OStepanenko" id="sprint4-HRCRM-1550-8-1">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">SELECT COUNT(*) FROM PROJECT WHERE NAME='Project2'</sqlCheck>
+        </preConditions>
+        <comment>If name Project2 not exists we have to add new value in table Project</comment>
+        <sql>
+            INSERT INTO Project (id, name, isdeleted, isdefault) VALUES ((SELECT 1+MAX(ID) FROM Project), 'Project2', 1,
+            1);
+        </sql>
+    </changeSet>
+
+    <changeSet author="OStepanenko" id="sprint4-HRCRM-1550-9-1">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="1">SELECT COUNT(*) FROM PROJECT WHERE NAME='Project3'</sqlCheck>
+        </preConditions>
+        <comment>If name Project3 exists we just have to change its default value</comment>
+        <sql>
+            UPDATE PROJECT SET ISDEFAULT=1 WHERE NAME='Project3';
+        </sql>
+    </changeSet>
+
+    <changeSet author="OStepanenko" id="sprint4-HRCRM-1550-10-1">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">SELECT COUNT(*) FROM PROJECT WHERE NAME='Project3'</sqlCheck>
+        </preConditions>
+        <comment>If name Project3 not exists we have to add new value in table Project</comment>
+        <sql>
+            INSERT INTO Project (id, name, isdeleted, isdefault) VALUES ((SELECT 1+MAX(ID) FROM Project), 'Project3', 1,
+            1);
+        </sql>
+    </changeSet>
+
+    <changeSet author="OAlieksienko" id="sprint4-HRCRM-sonar-1">
+        <renameColumn tableName="CANDIDATE_RECRUITMENT" oldColumnName="RECRUITMENT_ID" newColumnName="RECRUITMENTID"/>
+        <renameColumn tableName="CANDIDATE_RECRUITMENT" oldColumnName="CANDIDATE_ID" newColumnName="CANDIDATEID"/>
+    </changeSet>
+
+    <changeSet author="VKarpenko" id="sprint4-HRCRM-1470">
+        <comment>Adding indexes to speedup system response</comment>
+        <sql>
+            CREATE INDEX summary_id_DESC_idx ON TASK(SUMMARY DESC, ID DESC );
+            CREATE INDEX summary_id_ASC_idx ON TASK(SUMMARY ASC, ID ASC );
+
+            CREATE INDEX taskType_id_DESC_idx ON TASK(TASK_TYPE DESC, ID DESC );
+            CREATE INDEX taskType_id_ASC_idx ON TASK(TASK_TYPE ASC, ID ASC );
+
+            CREATE INDEX priority_id_DESC_idx ON TASK(PRIORITY DESC, ID DESC );
+            CREATE INDEX priority_id_ASC_idx ON TASK(PRIORITY ASC, ID ASC );
+
+            CREATE INDEX status_id_DESC_idx ON TASK(STATUS DESC, ID DESC );
+            CREATE INDEX status_id_ASC_idx ON TASK(STATUS ASC, ID ASC );
+
+            CREATE INDEX dueDate_id_DESC_idx ON TASK(DUEDATE DESC, ID DESC );
+            CREATE INDEX dueDate_id_ASC_idx ON TASK(DUEDATE ASC, ID ASC );
+
+            CREATE INDEX creationDate_id_DESC_idx ON TASK(CREATIONDATE DESC, ID DESC );
+            CREATE INDEX creationDate_id_ASC_idx ON TASK(CREATIONDATE ASC, ID ASC );
+        </sql>
+    </changeSet>
+
+    <changeSet author="OAlieksienko" id="sprint4-HRCRM-sonar-2">
+        <renameColumn tableName="RESOLUTION" oldColumnName="RESOLUTION" newColumnName="NAME"/>
+    </changeSet>
+
+    <changeSet author="OAlieksienko" id="sprint4-HRCRM-sonar-3">
+        <renameColumn tableName="COMPLEXITY" oldColumnName="COMPLEXITY" newColumnName="NAME"/>
+    </changeSet>
+
+    <changeSet author="OAlieksienko" id="sprint4-HRCRM-sonar-4">
+        <renameColumn tableName="QUESTIONS" oldColumnName="QUESTION" newColumnName="NAME"/>
+    </changeSet>
+
+</databaseChangeLog>

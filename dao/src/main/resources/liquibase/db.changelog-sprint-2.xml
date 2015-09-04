@@ -1,0 +1,280 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.3.xsd http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
+
+    <changeSet author="VKarpenko" id="sprint2-1">
+        <createTable tableName="PROJECT">
+            <column autoIncrement="true" name="ID" type="BIGINT(19)">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="NAME" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="ISDELETED" type="BOOLEAN" defaultValue="0"/>
+            <column name="ISDEFAULT" type="BOOLEAN" defaultValue="0"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet author="VKarpenko" id="sprint2-2">
+        <createTable tableName="POSITION">
+            <column autoIncrement="true" name="ID" type="BIGINT(19)">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="NAME" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="ISDELETED" type="BOOLEAN" defaultValue="0"/>
+            <column name="ISDEFAULT" type="BOOLEAN" defaultValue="0"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet author="VKarpenko" id="sprint2-3">
+        <createTable tableName="CANDIDATELEVEL">
+            <column autoIncrement="true" name="ID" type="BIGINT(19)">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="NAME" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="ISDELETED" type="BOOLEAN" defaultValue="0"/>
+            <column name="ISDEFAULT" type="BOOLEAN" defaultValue="0"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet author="VKarpenko" id="sprint2-4">
+        <addUniqueConstraint columnNames="NAME" deferrable="false"
+                             disabled="false" initiallyDeferred="false" tableName="PROJECT"/>
+    </changeSet>
+
+    <changeSet author="VKarpenko" id="sprint2-5">
+        <addUniqueConstraint columnNames="NAME" deferrable="false"
+                             disabled="false" initiallyDeferred="false" tableName="POSITION"/>
+    </changeSet>
+
+    <changeSet author="VKarpenko" id="sprint2-6">
+        <addUniqueConstraint columnNames="NAME" deferrable="false"
+                             disabled="false" initiallyDeferred="false" tableName="CANDIDATELEVEL"/>
+    </changeSet>
+
+    <changeSet author="VKarpenko" id="sprint2-7">
+        <addColumn tableName="TASK">
+            <column name="PROJECT_ID" type="BIGINT(19)"/>
+            <column name="POSITION_ID" type="BIGINT(19)"/>
+            <column name="CANDIDATELEVEL_ID" type="BIGINT(19)"/>
+        </addColumn>
+    </changeSet>
+
+    <changeSet author="VKarpenko" id="sprint2-8">
+        <addForeignKeyConstraint baseColumnNames="PROJECT_ID" baseTableName="TASK"
+                                 deferrable="false" constraintName="FK_9G2H9MPW1NBDGELSJVLY03JA1"
+                                 initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT"
+                                 referencedColumnNames="ID" referencedTableName="PROJECT"/>
+
+        <addForeignKeyConstraint baseColumnNames="POSITION_ID" baseTableName="TASK"
+                                 deferrable="false" constraintName="FK_9G2H9MPW1NBDGELSJ0SJTW6CG"
+                                 initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT"
+                                 referencedColumnNames="ID" referencedTableName="POSITION"/>
+
+        <addForeignKeyConstraint baseColumnNames="CANDIDATELEVEL_ID" baseTableName="TASK"
+                                 deferrable="false" constraintName="FK_9G2H9MPW1NBDGELSJ29GOEL3M"
+                                 initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT"
+                                 referencedColumnNames="ID" referencedTableName="CANDIDATELEVEL"/>
+    </changeSet>
+
+    <changeSet author="VKarpenko" id="sprint2-9">
+        <insert tableName="CANDIDATELEVEL">
+            <column name="ID" valueNumeric="1"/>
+            <column name="NAME" value="0"/>
+            <column name="ISDEFAULT" value="1"/>
+        </insert>
+        <insert tableName="CANDIDATELEVEL">
+            <column name="ID" valueNumeric="2"/>
+            <column name="NAME" value="1"/>
+            <column name="ISDEFAULT" value="1"/>
+        </insert>
+        <insert tableName="CANDIDATELEVEL">
+            <column name="ID" valueNumeric="3"/>
+            <column name="NAME" value="2"/>
+            <column name="ISDEFAULT" value="1"/>
+        </insert>
+        <insert tableName="CANDIDATELEVEL">
+            <column name="ID" valueNumeric="4"/>
+            <column name="NAME" value="3"/>
+            <column name="ISDEFAULT" value="1"/>
+        </insert>
+    </changeSet>
+    <changeSet author="VKarpenko" id="sprint2-10">
+        <insert tableName="POSITION">
+            <column name="ID" valueNumeric="1"/>
+            <column name="NAME" value="PJ"/>
+            <column name="ISDEFAULT" value="1"/>
+        </insert>
+        <insert tableName="POSITION">
+            <column name="ID" valueNumeric="2"/>
+            <column name="NAME" value="TM"/>
+            <column name="ISDEFAULT" value="1"/>
+        </insert>
+        <insert tableName="POSITION">
+            <column name="ID" valueNumeric="3"/>
+            <column name="NAME" value="BA"/>
+            <column name="ISDEFAULT" value="1"/>
+        </insert>
+    </changeSet>
+
+    <changeSet id="sprint2-11" author="MSizonenko">
+        <createTable tableName="HUMANRESOURCEMANAGER">
+            <column name="ID" autoIncrement="true" type="BIGINT(19)">
+                <constraints primaryKey="true" primaryKeyName="PK_HRM"/>
+            </column>
+            <column name="FIRSTNAME" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="LASTNAME" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="EMAIL" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="LOGIN" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="PASSWORD" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="HR_PRIVILEGES" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="DESCRIPTION" type="VARCHAR(255)"/>
+        </createTable>
+    </changeSet>
+    <changeSet id="sprint2-12" author="MSizonenko">
+        <createTable tableName="HRM_PROJECT">
+            <column name="HRM_ID" type="BIGINT(19)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="PROJECT_ID" type="BIGINT(19)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet id="sprint2-13" author="MSizonenko">
+        <addForeignKeyConstraint baseTableName="HRM_PROJECT" baseColumnNames="HRM_ID" constraintName="FK_2HRMID"
+                                 referencedTableName="HUMANRESOURCEMANAGER" referencedColumnNames="ID"/>
+        <addForeignKeyConstraint baseTableName="HRM_PROJECT" baseColumnNames="PROJECT_ID" constraintName="FK_2PRJID"
+                                 referencedTableName="PROJECT" referencedColumnNames="ID"/>
+    </changeSet>
+
+    <!-- Add column to table Complexity -->
+    <changeSet author="OStepurko" id="sprint2-14">
+        <addColumn tableName="COMPLEXITY">
+            <column name="TASKTYPE" type="VARCHAR(255)"/>
+            <column name="ISDELETED" type="BOOLEAN" defaultValue="0"/>
+            <column name="ISDEFAULT" type="BOOLEAN" defaultValue="1"/>
+        </addColumn>
+    </changeSet>
+
+    <!-- Update table Complexity-->
+    <changeSet author="OStepurko" id="sprint2-15">
+        <update tableName="COMPLEXITY">
+            <column name="TASKTYPE" value="ODSInternal"/>
+            <where>id='1'</where>
+        </update>
+        <update tableName="COMPLEXITY">
+            <column name="TASKTYPE" value="ODSInternal"/>
+            <where>id='2'</where>
+        </update>
+        <update tableName="COMPLEXITY">
+            <column name="TASKTYPE" value="ODSInternal"/>
+            <where>id='3'</where>
+        </update>
+        <update tableName="COMPLEXITY">
+            <column name="TASKTYPE" value="ODSInternal"/>
+            <where>id='4'</where>
+        </update>
+        <update tableName="COMPLEXITY">
+            <column name="TASKTYPE" value="ODSInternal"/>
+            <where>id='5'</where>
+        </update>
+    </changeSet>
+
+    <changeSet author="OStepurko" id="sprint2-16">
+        <dropUniqueConstraint tableName="COMPLEXITY"
+                              constraintName="UK_J5Y2ITL551283QD6Y8YM511I2"
+                              uniqueColumns="COMPLEXITY"/>
+    </changeSet>
+
+    <!-- Add data into table Complexity-->
+    <changeSet author="OStepurko" id="sprint2-17">
+        <insert tableName="COMPLEXITY">
+            <column name="ID" valueNumeric="6"/>
+            <column name="TASKTYPE" value="Recruitment"/>
+            <column name="COMPLEXITY" value="1"/>
+        </insert>
+        <insert tableName="COMPLEXITY">
+            <column name="ID" valueNumeric="7"/>
+            <column name="TASKTYPE" value="Recruitment"/>
+            <column name="COMPLEXITY" value="2"/>
+        </insert>
+        <insert tableName="COMPLEXITY">
+            <column name="ID" valueNumeric="8"/>
+            <column name="TASKTYPE" value="Recruitment"/>
+            <column name="COMPLEXITY" value="3"/>
+        </insert>
+        <insert tableName="COMPLEXITY">
+            <column name="ID" valueNumeric="9"/>
+            <column name="TASKTYPE" value="Recruitment"/>
+            <column name="COMPLEXITY" value="4"/>
+        </insert>
+        <insert tableName="COMPLEXITY">
+            <column name="ID" valueNumeric="10"/>
+            <column name="TASKTYPE" value="Recruitment"/>
+            <column name="COMPLEXITY" value="5"/>
+        </insert>
+    </changeSet>
+    <changeSet author="VKarpenko" id="sprint2-18">
+        <sql>
+            UPDATE TASK SET COMPLEXITY_ID = COMPLEXITY_ID + 5
+            WHERE TASK_TYPE = 'Recruitment' AND COMPLEXITY_ID &lt;= 5;
+        </sql>
+    </changeSet>
+    <changeSet author="VKarpenko" id="sprint2-19">
+        <addDefaultValue tableName="COMPLEXITY" columnName="ISDEFAULT" defaultValue="0"/>
+    </changeSet>
+    <!--
+    <changeSet id="sprint2-20" author="MSizonenko">
+        <delete tableName="CANDIDATELEVEL">
+            <where>ID = 1</where>
+        </delete>
+    </changeSet>-->
+    <changeSet author="MSizonenko" id="sprint2-20-1">
+        <sql>
+            UPDATE CANDIDATELEVEL SET ISDELETED = 1, ISDEFAULT = 0 WHERE ID = 1;
+        </sql>
+    </changeSet>
+    <changeSet id="sprint2-21" author="MSizonenko">
+        <sql>
+            UPDATE HUMANRESOURCEMANAGER SET LASTNAME = 'TEST1' WHERE TRIM(LASTNAME) IS NULL;
+            UPDATE HUMANRESOURCEMANAGER SET FIRSTNAME = 'TEST1' WHERE TRIM(FIRSTNAME) IS NULL;
+            UPDATE HUMANRESOURCEMANAGER SET LOGIN = 'TEST1' WHERE TRIM(LOGIN) IS NULL;
+            UPDATE HUMANRESOURCEMANAGER SET EMAIL = 'TEST1' WHERE TRIM(EMAIL) IS NULL;
+        </sql>
+    </changeSet>
+    <changeSet author="MSizonenko" id="sprint2-22">
+        <sql>
+            UPDATE HUMANRESOURCEMANAGER SET EMAIL = 'test_test@test.com' WHERE LOGIN = 'qweqwe';
+        </sql>
+    </changeSet>
+    <!--<changeSet id="sprint2-23" author="MSizonenko">-->
+    <!--<sql>-->
+    <!--UPDATE TASK SET PRIORITY = 'LOW' WHERE PRIORITY IS NULL;-->
+    <!--UPDATE TASK SET COMPLEXITY_ID = 1 WHERE COMPLEXITY_ID IS NULL AND TASK_TYPE = 'ODSInternal';-->
+    <!--UPDATE TASK SET COMPLEXITY_ID = 6 WHERE COMPLEXITY_ID IS NULL AND TASK_TYPE = 'Recruitment';-->
+    <!--UPDATE TASK SET SUMMARY = 'TEST' WHERE SUMMARY IS NULL;-->
+    <!--ALTER TABLE TASK MODIFY PRIORITY NOT NULL;-->
+    <!--ALTER TABLE TASK MODIFY SUMMARY NOT NULL;-->
+    <!--ALTER TABLE TASK MODIFY COMPLEXITY_ID NOT NULL;-->
+    <!--</sql>-->
+    <!--</changeSet>-->
+</databaseChangeLog>

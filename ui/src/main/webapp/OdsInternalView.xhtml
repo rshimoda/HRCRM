@@ -1,0 +1,686 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui">
+
+    <h:form id="odsInternalViewForm">
+        <!--Header section -->
+        <p>
+            <p:link outcome="ViewTasks" value="#{msgs['TaskProperty.ViewTasks']}" styleClass="hrcrm-link"/>
+            <p:spacer width="5" height="1"/>
+            >
+            <p:spacer width="5" height="1"/>
+            <p:commandLink action="#{odsInternalBean.fiterViewTasks()}" value="#{msgs['TaskProperty.ODSInternal']}"
+                           styleClass="hrcrm-link"/>
+            <p:spacer width="5" height="1"/>
+            >
+            <p:spacer width="5" height="1"/>
+            <p:outputLabel value="#{odsInternalBean.task.id}"/>
+        </p>
+
+
+        <p:panelGrid style="width: 80em;table-layout:fixed;" styleClass="noBorder" layout="tabular">
+            <p:row>
+                <p:column style="height: 5em; width: 55em">
+                    <h4>
+                        <p:outputLabel
+                                value="#{odsInternalBean.task.id}: #{odsInternalBean.task.summary}"
+                                style="word-wrap:break-word;"
+                                rendered="#{!odsInternalBean.editMode}"/>
+                        <p:inputText id="summary"
+                                     required="true"
+                                     style="width:100%;"
+                                     rendered="#{odsInternalBean.editMode}"
+                                     requiredMessage="#{msgs['TaskValidation.emptyError']}"
+                                     value="#{odsInternalBean.task.summary}">
+                            <p:ajax update="summaryMessage" event="keyup"/>
+                            <f:validator validatorId="summaryValidator"/>
+                        </p:inputText>
+                    </h4>
+                </p:column>
+                <p:column>
+                    <p:message for="summary" id="summaryMessage" display="text"/>
+                </p:column>
+            </p:row>
+
+            <p:row>
+                <p:column>
+                    <p:panelGrid id="ButtonPanel" style="table-layout:fixed;" styleClass="noBorder">
+                        <p:row>
+                            <p:column style="width: 9em">
+                                <p:commandButton value="#{msgs['DialogButton.Edit']}"
+                                                 styleClass="hrcrm-button"
+                                                 actionListener="#{odsInternalBean.startEdit()}"
+                                                 update="odsInternalViewForm"
+                                                 rendered="#{!odsInternalBean.editMode and !odsInternalBean.taskIsClosed}"/>
+                                <!--and !odsInternalBean.taskIsClosed-->
+                                <p:commandButton value="#{msgs['DialogButton.Update']}"
+                                                 rendered="#{odsInternalBean.editMode}"
+                                                 action="#{odsInternalBean.finishUpdate()}"
+                                                 update="odsInternalViewForm"
+                                                 styleClass="hrcrm-button"/>
+                            </p:column>
+                            <p:column style="width: 9em">
+                                <p:commandButton value="#{msgs['DialogButton.Cancel']}"
+                                                 styleClass="hrcrm-button"
+                                                 type="button"
+                                                 onclick="PF('dlg1').show();"
+                                                 rendered="#{odsInternalBean.editMode}"/>
+                            </p:column>
+
+                            <p:column style="width: 13em">
+                                <p:commandButton value="#{msgs['DialogButton.StartProgress']}"
+                                                 style="min-width: 90%!important;"
+                                                 styleClass="hrcrm-button"
+                                                 rendered="#{!odsInternalBean.taskIsClosed and !odsInternalBean.editMode}"/>
+                            </p:column>
+
+                            <p:column style="width: 9em">
+                                <p:commandButton value="#{msgs['DialogButton.Assign']}"
+                                                 styleClass="hrcrm-button"
+                                                 rendered="#{!odsInternalBean.taskIsClosed and !odsInternalBean.editMode}"
+                                                 update=":odsseta1"
+                                                 oncomplete="PF('seta1').show();"/>
+                            </p:column>
+
+                            <p:column style="width: 9em">
+                                <p:commandButton value="#{msgs['DialogButton.Resolve']}"
+                                                 styleClass="hrcrm-button"
+                                                 rendered="#{!odsInternalBean.taskIsClosed and !odsInternalBean.editMode}"
+                                                 update=":rezolution"
+                                                 oncomplete="PF('rezol1').show();"/>
+                            </p:column>
+
+                            <p:column style="width: 9em">
+                                <p:commandButton value="#{msgs['DialogButton.Close']}"
+                                                 styleClass="hrcrm-button"
+                                                 action="#{odsInternalBean.closeTask()}"
+                                                 rendered="#{!odsInternalBean.taskIsClosed and !odsInternalBean.editMode}"
+                                                 update="odsInternalViewForm"/>
+                                <p:commandButton value="#{msgs['DialogButton.Reopen']}"
+                                                 styleClass="hrcrm-button"
+                                                 actionListener="#{odsInternalBean.reopen()}"
+                                                 update="odsInternalViewForm"
+                                                 rendered="#{odsInternalBean.taskIsClosed}"/>
+                            </p:column>
+                        </p:row>
+                    </p:panelGrid>
+                </p:column>
+                <p:column/>
+            </p:row>
+            <p:row>
+                <p:column style="vertical-align: top">
+                    <p:panelGrid id="leftPanelGrid" styleClass="noBorder"
+                                 style="width: 100%; table-layout:fixed;">
+
+
+                        <p:row>
+                            <p:column colspan="6">
+                                <h4 class="headerWithLine">
+                                    <p:outputLabel value="#{msgs['TaskProperty.Details']}"/>
+                                </h4>
+
+                            </p:column>
+                        </p:row>
+
+
+                        <p:row>
+                            <p:column style="width: 10%">
+                                <p:outputLabel value="#{msgs['TaskProperty.TaskType']}:"/>
+                            </p:column>
+                            <p:column colspan="2" style="width: 40%">
+                                <p:outputLabel
+                                        value="#{msgs[odsInternalBean.task.getClass().getName()]}"/>
+                            </p:column>
+                            <p:column style="width: 10%">
+                                <p:outputLabel value="#{msgs['TaskProperty.Status']}:"/>
+                            </p:column>
+                            <p:column colspan="2" style="width: 40%">
+                                <p:outputLabel value="#{odsInternalBean.task.status.name}"/>
+                            </p:column>
+                        </p:row>
+
+                        <p:row>
+                            <p:column>
+                                <p:outputLabel value="#{msgs['TaskProperty.Complexity']}"/>
+                            </p:column>
+                            <p:column colspan="2">
+                                <p:selectOneMenu id="complexity"
+                                                 style="color: #000000;width:40%;"
+                                                 effectSpeed="fast"
+                                                 value="#{odsInternalBean.task.complexity}"
+                                                 rendered="#{odsInternalBean.editMode}"
+                                                 converter="#{complexityConverter}"
+                                                 required="true"
+                                                 requiredMessage="#{msgs['TaskValidation.emptyError']}">
+                                    <f:selectItem/>
+                                    <f:selectItems value="#{odsInternalBean.complexities}"
+                                                   var="complexity"
+                                                   itemValue="#{complexity}"
+                                                   itemLabel="#{complexity.name}"/>
+                                    <p:ajax update="complexityMessage" event="change"/>
+                                </p:selectOneMenu>
+                                <p:outputLabel
+                                        value="#{odsInternalBean.task.complexity.name}"
+                                        style="word-wrap:break-word;"
+                                        rendered="#{!odsInternalBean.editMode}"/>
+                                <p:message id="complexityMessage" for="complexity" display="text"/>
+                            </p:column>
+                            <p:column>
+                                <p:outputLabel value="#{msgs['TaskProperty.Resolution']}:"/>
+                            </p:column>
+                            <p:column colspan="2">
+                                <p:outputLabel
+                                        value="#{odsInternalBean.task.resolution.name}"/>
+                            </p:column>
+                        </p:row>
+
+                        <p:row>
+                            <p:column>
+                                <p:outputLabel value="#{msgs['TaskProperty.Priority']}"/>
+                            </p:column>
+                            <p:column colspan="2">
+                                <p:selectOneMenu id="priority"
+                                                 style="color: #000000;width:40%;"
+                                                 effectSpeed="fast"
+                                                 value="#{odsInternalBean.task.priority}"
+                                                 rendered="#{odsInternalBean.editMode}"
+                                                 required="true"
+                                                 requiredMessage="#{msgs['TaskValidation.emptyError']}">
+                                    <f:selectItem/>
+                                    <f:selectItems value="#{odsInternalBean.priorities}"
+                                                   var="priority"
+                                                   itemValue="#{priority}"
+                                                   itemLabel="#{priority.name}"/>
+                                    <p:ajax update="priorityMessage" event="change"/>
+                                </p:selectOneMenu>
+                                <p:outputLabel value="#{odsInternalBean.task.priority.name}"
+                                               style="word-wrap:break-word;"
+                                               rendered="#{!odsInternalBean.editMode}"/>
+                                <p:message id="priorityMessage" for="priority" display="text"/>
+                            </p:column>
+                        </p:row>
+
+                        <p:row>
+                            <p:column colspan="6">
+                                <h4 class="headerWithLine">
+                                    <p:outputLabel value="#{msgs['TaskProperty.Description']}"/>
+                                </h4>
+                            </p:column>
+                        </p:row>
+
+                        <p:row>
+                            <p:column colspan="6">
+                                <p:message for="description" id="descriptionMessage" display="text"/>
+                                <p:outputLabel value="#{odsInternalBean.task.description}"
+                                               style="word-wrap:break-word; white-space: pre;"
+                                               rendered="#{!odsInternalBean.editMode}"/>
+                                <p:inputTextarea id="description" rows="9" cols="100"
+                                                 styleClass="textareaCreate"
+                                                 value="#{odsInternalBean.task.description}"
+                                                 style="width:100%; white-space: pre;"
+                                                 rendered="#{odsInternalBean.editMode}"
+                                                 autoResize="false">
+                                    <p:ajax update="descriptionMessage" event="keyup"/>
+                                    <f:validator validatorId="descriptionValidator"/>
+                                </p:inputTextarea>
+                            </p:column>
+                        </p:row>
+                    </p:panelGrid>
+
+                    <!-- Comments pannel grid -->
+
+                    <p:panelGrid id="commentsPanelGrid"
+                                 styleClass="noBorder"
+                                 rendered="#{!odsInternalBean.editMode}"
+                                 style="width: 100%; table-layout:fixed;">
+
+                        <!-- Comments area -->
+
+                        <p:row>
+                            <p:column colspan="6">
+                                <h4 class="headerWithLine">
+                                    <p:outputLabel value="#{msgs['TaskProperty.Comments']}"/>
+                                </h4>
+                            </p:column>
+                        </p:row>
+
+                        <!-- Show task comments area -->
+
+                        <p:row>
+                            <p:column colspan="6">
+                                <ui:repeat value="#{odsInternalBean.comments}" var="comm">
+                                    <h:outputText
+                                            style="width:100%;  word-wrap: break-word; font-style: italic; font-weight: bold;"
+                                            value="#{comm.user.fullName}"/>
+                                    <h:outputText
+                                            style="width:100%;  word-wrap: break-word; font-style: italic; font-weight: bold;"
+                                            value=" added a comment - "/>
+                                    <h:outputText
+                                            style="width:100%;  word-wrap: break-word; font-style: italic; font-weight: bold;"
+                                            value="#{comm.date}">
+                                        <f:convertDateTime pattern="dd/MMM/yy HH:mm" locale="en"/>
+                                    </h:outputText>
+                                    <br/>
+                                    <h:outputText style="width:100%;  word-wrap: break-word;"
+                                                  value="#{comm.comment}"/>
+                                    <br/>
+                                    <br/>
+                                </ui:repeat>
+                            </p:column>
+                        </p:row>
+
+                        <p:row>
+                            <p:column colspan="6">
+                                <p:commandButton value="#{msgs['DialogButton.Comment']}"
+                                                 styleClass="hrcrm-button"
+                                                 actionListener="#{odsInternalBean.startAddComments()}"
+                                                 rendered="#{!odsInternalBean.enableAddComments}"
+                                                 update="odsInternalViewForm"/>
+                            </p:column>
+                        </p:row>
+
+                        <p:row>
+                            <p:column colspan="6">
+                                <p:message for="comments" id="commentsMessage" display="text"/>
+                                <p:inputTextarea id="comments" rows="9" cols="100"
+                                                 styleClass="textareaCreate"
+                                                 style="width:100%;"
+                                                 autoResize="false"
+                                                 value="#{odsInternalBean.commentValue}"
+                                                 rendered="#{odsInternalBean.enableAddComments}">
+                                    <p:ajax update="commentsMessage" event="keyup"/>
+                                    <f:validator validatorId="commentsValidator"/>
+                                </p:inputTextarea>
+                            </p:column>
+                        </p:row>
+
+                        <p:row>
+                            <p:column colspan="6">
+                                <p:commandButton value="#{msgs['DialogButton.SaveComment']}"
+                                                 styleClass="hrcrm-button-long"
+                                                 rendered="#{odsInternalBean.enableAddComments}"
+                                                 actionListener="#{odsInternalBean.addCommentFromArea()}"
+                                                 update="odsInternalViewForm"/>
+                                <p:spacer width="20"/>
+                                <p:commandButton value="#{msgs['DialogButton.Cancel']}"
+                                                 styleClass="hrcrm-button"
+                                                 rendered="#{odsInternalBean.enableAddComments}"
+                                                 actionListener="#{odsInternalBean.commentCancel()}"
+                                                 update="odsInternalViewForm"
+                                                 immediate="true"/>
+                            </p:column>
+                        </p:row>
+
+                    </p:panelGrid>
+
+                    <!-- End Comments Pannel grid -->
+                </p:column>
+
+                <p:column style="vertical-align: top">
+                    <p:panelGrid id="rightPanelGrid" styleClass="noBorder"
+                                 style="width: 100%;">
+                        <p:row>
+                            <p:column colspan="4">
+                                <h4 class="headerWithLine">
+                                    <p:outputLabel value="#{msgs['TaskProperty.People']}"/>
+                                </h4>
+                            </p:column>
+                        </p:row>
+                        <p:row>
+                            <p:column>
+                                <p:outputLabel id="assignee-label"
+                                               value="#{msgs['TaskProperty.Assignee']}:"/>
+                            </p:column>
+                            <p:column colspan="3">
+                                <p:outputLabel value="#{odsInternalBean.assigneeFullName}"
+                                               style="word-wrap:break-word;"
+                                               rendered="#{!odsInternalBean.editMode}"/>
+                                <p:selectOneMenu id="assignee"
+                                                 value="#{odsInternalBean.task.assignee}"
+                                                 effectSpeed="fast"
+                                                 required="false"
+                                                 converter="#{userConverter}"
+                                                 style="width:90%;"
+                                                 rendered="#{odsInternalBean.editMode}"
+                                                 filter="true">
+                                    <f:selectItem itemLabel="#{msgs['Popup.SetAssigneeUnassigned']}"/>
+                                    <f:selectItems
+                                            value="#{odsInternalBean.users}"
+                                            var="userA"
+                                            itemLabel="#{userA.fullName}"
+                                            itemValue="#{userA}"/>
+                                </p:selectOneMenu>
+                            </p:column>
+                        </p:row>
+                        <p:row>
+                            <p:column>
+                                <p:outputLabel id="creator-label" value="#{msgs['TaskProperty.Creator']}:"/>
+                            </p:column>
+                            <p:column colspan="3">
+                                <p:outputLabel value="#{odsInternalBean.task.creator.fullName}">
+                                </p:outputLabel>
+                            </p:column>
+                        </p:row>
+
+                        <p:row>
+                            <p:column colspan="4">
+                                <h4 class="headerWithLine">
+                                    <p:outputLabel value="#{msgs['TaskProperty.Dates']}"/>
+                                </h4>
+                            </p:column>
+                        </p:row>
+                        <p:row>
+                            <p:column colspan="2" style="width: 50%">
+                                <p:outputLabel id="due-date" value="#{msgs['TaskProperty.DueDate']}:"/>
+                            </p:column>
+
+                            <p:column colspan="2" style="width: 50%">
+                                <p:outputLabel value="#{odsInternalBean.task.dueDate}"
+                                               rendered="#{!odsInternalBean.editMode}">
+                                    <f:convertDateTime pattern="MM/dd/yyyy"/>
+                                </p:outputLabel>
+                                <p:calendar id="due"
+                                            onkeypress="return event.keyCode != 13;"
+                                            effectSpeed="fast"
+                                            rendered="#{odsInternalBean.editMode}"
+                                            value="#{odsInternalBean.task.dueDate}"
+                                            placeholder="MM/DD/YYYY"
+                                            pattern="MM/dd/yyyy"
+                                            mask="99/99/9999"
+                                            converterMessage="#{msgs['TaskValidation.dateError']}"
+                                            validatorMessage="#{msgs['TaskValidation.dateValidationError']}"
+                                            showOn="button"
+                                            size="10"
+                                            mindate="#{odsInternalBean.task.creationDate}">
+                                    <f:validator validatorId="futureDateValidator"/>
+                                    <p:ajax update="calendarMessage" event="change"/>
+                                    <p:ajax update="calendarMessage" event="dateSelect"/>
+                                    <f:attribute name="date"
+                                                 value="#{odsInternalBean.task.creationDate}"/>
+                                </p:calendar>
+                            </p:column>
+                        </p:row>
+                        <p:row>
+                            <p:column colspan="4" style="height: 0 !important; padding: 0 !important">
+                                <p:message for="due" id="calendarMessage" display="text"/>
+                            </p:column>
+                        </p:row>
+                        <p:row>
+                            <p:column colspan="2">
+                                <p:outputLabel id="created" value="#{msgs['TaskProperty.CreationDate']}:"/>
+                            </p:column>
+                            <p:column colspan="2">
+                                <p:outputLabel value="#{odsInternalBean.task.creationDate}">
+                                    <f:convertDateTime pattern="MM/dd/yyyy"/>
+                                </p:outputLabel>
+                            </p:column>
+                        </p:row>
+                        <p:row>
+                            <p:column colspan="2">
+                                <p:outputLabel id="updeted"
+                                               value="#{msgs['TaskProperty.LastUpdatedDate']}:"/>
+                            </p:column>
+                            <p:column colspan="2">
+                                <p:outputLabel id="updated"
+                                               value="#{odsInternalBean.task.updateDate}">
+                                    <f:convertDateTime pattern="MM/dd/yyyy"/>
+                                </p:outputLabel>
+                            </p:column>
+                        </p:row>
+                        <p:row>
+                            <p:column colspan="2">
+                                <p:outputLabel id="closed"
+                                               value="#{msgs['TaskProperty.ClosedDate']}:"/>
+                            </p:column>
+                            <p:column colspan="2">
+                                <p:outputLabel value="#{odsInternalBean.task.closedDate}">
+                                    <f:convertDateTime pattern="MM/dd/yyyy"/>
+                                </p:outputLabel>
+                            </p:column>
+                        </p:row>
+
+                    </p:panelGrid>
+                </p:column>
+            </p:row>
+        </p:panelGrid>
+    </h:form>
+
+    <!-- Create popup menu-->
+
+    <p:confirmDialog message="#{msgs['Popup.CancelEdit']}"
+                     widgetVar="dlg1" closable="false" severity="alert">
+        <h:panelGroup layout="block" style="text-align: right">
+            <h:form>
+                <p:commandButton value="#{msgs['DialogButton.Ok']}"
+                                 styleClass="hrcrm-button"
+                                 oncomplete="PF('dlg1').hide();"
+                                 actionListener="#{odsInternalBean.cancelEdit()}"
+                                 update=":odsInternalViewForm"/>
+                <p:spacer width="20"/>
+
+                <p:commandButton value="#{msgs['DialogButton.Cancel']}" type="button"
+                                 styleClass="hrcrm-button" onclick="PF('dlg1').hide();"/>
+            </h:form>
+        </h:panelGroup>
+    </p:confirmDialog>
+    <p:confirmDialog id="odsseta1"
+                     widgetVar="seta1"
+                     closable="false">
+        <f:facet name="header">
+            <p:panelGrid styleClass="noBorder" style="width: 100%;">
+
+                <p:row>
+                    <p:column>
+                        <p:outputLabel style="font-size:14px;" value="#{msgs['Popup.SetAssignee']}"/>
+                    </p:column>
+                    <p:column style="text-align:right; vertical-align:top;">
+                        <p:commandLink class="hrcrm-close" onclick="PF('seta2').show();">
+                            <span class="ui-icon ui-icon-closethick"></span>
+                        </p:commandLink>
+                    </p:column>
+                </p:row>
+            </p:panelGrid>
+        </f:facet>
+        <f:facet name="message">
+            <h:form>
+                <p:panelGrid styleClass="noBorder" style="height:5em; vertical-align:top;">
+                    <p:row>
+                        <p:column style="width:9em;">
+                            <p:outputLabel value="#{msgs['TaskProperty.Assignee']}:"/>
+                        </p:column>
+                        <p:column style="width:18em;">
+                            <p:selectOneMenu id="setaassignee"
+                                             value="#{odsInternalBean.assigneeSet}"
+                                             effectSpeed="fast"
+                                             required="false"
+                                             converter="#{userConverter}"
+                                             style="width:90%;"
+                                             filter="true">
+                                <f:selectItem itemLabel="#{msgs['Popup.SetAssigneeUnassigned']}"/>
+                                <f:selectItems
+                                        value="#{odsInternalBean.users}"
+                                        var="userA"
+                                        itemLabel="#{userA.fullName}"
+                                        itemValue="#{userA}"/>
+                            </p:selectOneMenu>
+                        </p:column>
+                        <p:column style="width:9em;">
+                        </p:column>
+                    </p:row>
+                </p:panelGrid>
+                <h:panelGroup layout="block" style="text-align: right">
+                    <p:commandButton value="#{msgs['DialogButton.Assign']}"
+                                     styleClass="hrcrm-button"
+                                     action="#{odsInternalBean.assigneeUpdate()}"
+                                     oncomplete="PF('seta1').hide();"
+                                     update=":odsInternalViewForm">
+                    </p:commandButton>
+                    <p:spacer width="20"/>
+                    <p:commandButton value="#{msgs['DialogButton.Cancel']}" type="button"
+                                     styleClass="hrcrm-button"
+                                     onclick="PF('seta2').show();"/>
+                </h:panelGroup>
+            </h:form>
+        </f:facet>
+    </p:confirmDialog>
+    <p:confirmDialog message="#{msgs['Popup.CancelSetAssignee']}"
+                     widgetVar="seta2" closable="false" severity="alert">
+        <h:panelGroup layout="block" style="text-align: right">
+            <h:form>
+                <p:commandButton value="#{msgs['DialogButton.Ok']}"
+                                 styleClass="hrcrm-button"
+                                 onclick="PF('seta2').hide();"
+                                 oncomplete="PF('seta1').hide();"/>
+                <p:spacer width="20"/>
+
+                <p:commandButton value="#{msgs['DialogButton.Cancel']}" type="button"
+                                 styleClass="hrcrm-button" onclick="PF('seta2').hide();"/>
+            </h:form>
+        </h:panelGroup>
+    </p:confirmDialog>
+
+
+    <!-- Resolution Issue popup menu -->
+
+    <p:confirmDialog id="rezolution"
+                     widgetVar="rezol1"
+                     closable="false"
+                     style="width: 650px!important;">
+
+        <!-- Window header -->
+
+        <f:facet name="header">
+            <p:panelGrid styleClass="noBorder" style="width: 620px;">
+                <p:row>
+                    <p:column>
+                        <p:outputLabel style="font-size:14px;" value="#{msgs['Popup.SetResolution']}"/>
+                    </p:column>
+                    <p:column style="text-align:right; vertical-align:middle;">
+                        <p:commandLink class="hrcrm-close" onclick="PF('rezol2').show();">
+                            <span class="ui-icon ui-icon-closethick"></span>
+                        </p:commandLink>
+                    </p:column>
+                </p:row>
+            </p:panelGrid>
+        </f:facet>
+        <f:facet name="message">
+            <h:form>
+                <p:panelGrid styleClass="noBorder" style="height:5em;
+                vertical-align:top;
+                width: 600px!important;
+                padding-bottom: 10px!important;">
+
+                    <!-- Resolution row -->
+
+                    <p:row>
+                        <p:column>
+                            <p:outputLabel style="width:120px!important; margin-top: 8px; margin-bottom: 8px"
+                                           value="#{msgs['TaskProperty.SetResolution']}:"/>
+                        </p:column>
+                        <p:column style="width:18em;">
+                            <p:selectOneMenu id="setrresolution"
+                                             value="#{odsInternalBean.resolutionSet}"
+                                             effectSpeed="fast"
+                                             required="true"
+                                             requiredMessage="#{msgs['TaskValidation.emptyError']}"
+                                             converter="#{resolutionConverter}"
+                                             style="width:226px;">
+                                <f:selectItem itemDisabled="true"/>
+                                <f:selectItems
+                                        value="#{odsInternalBean.resolutionValue}"
+                                        var="rezol"
+                                        itemLabel="#{rezol.name}"
+                                        itemValue="#{rezol}"/>
+                                <p:ajax update="setrresolutionMessage" event="change"/>
+                            </p:selectOneMenu>
+                            <p:message id="setrresolutionMessage" for="setrresolution" display="text"/>
+                        </p:column>
+                        <p:column style="width:9em;">
+                        </p:column>
+                    </p:row>
+
+
+                    <!-- Assignee Row -->
+
+                    <p:row>
+                        <p:column style="width:9em;">
+                            <p:outputLabel style="width:120px;margin-top: 8px; margin-bottom: 8px"
+                                           value="#{msgs['TaskProperty.Assignee']}:"/>
+                        </p:column>
+                        <p:column style="width:18em;">
+                            <p:selectOneMenu id="setrassignee"
+                                             value="#{odsInternalBean.task.assignee}"
+                                             effectSpeed="fast"
+                                             required="false"
+                                             converter="#{userConverter}"
+                                             style="width:226px;"
+                                             filter="true">
+                                <f:selectItem itemLabel="#{msgs['Popup.SetAssigneeUnassigned']}"/>
+                                <f:selectItems
+                                        value="#{odsInternalBean.users}"
+                                        var="userA"
+                                        itemLabel="#{userA.fullName}"
+                                        itemValue="#{userA}"/>
+                            </p:selectOneMenu>
+                        </p:column>
+                        <p:column style="width:9em;">
+                        </p:column>
+                    </p:row>
+
+                    <!-- Comment row -->
+
+                    <p:row>
+                        <p:column style="vertical-align: top;">
+                            <p:outputLabel style="width:120px;margin-top: 8px; margin-bottom: 8px"
+                                           value="#{msgs['TaskProperty.Comment']}:"/>
+                        </p:column>
+                        <p:column style="width:18em;">
+                            <p:message for="commentResolveIssue" id="commentsMessageResolveIssue" display="text"/>
+                            <p:inputTextarea id="commentResolveIssue" rows="9" cols="100"
+                                             value="#{odsInternalBean.commentValue}"
+                                             styleClass="textareaCreate"
+                                             style="width:460px; height:150px"
+                                             autoResize="false">
+                                <p:ajax update="commentsMessageResolveIssue" event="keyup"/>
+                                <f:validator validatorId="commentsValidator"/>
+                            </p:inputTextarea>
+                        </p:column>
+                    </p:row>
+
+                </p:panelGrid>
+                <h:panelGroup layout="block" style="text-align: right; padding-top: 10px; padding-right: 20px;">
+                    <p:commandButton value="#{msgs['DialogButton.Resolve']}"
+                                     styleClass="hrcrm-button"
+                                     action="#{odsInternalBean.resolutionUpdate()}"
+                                     oncomplete="if (!args.validationFailed) PF('rezol1').hide();"
+                                     update=":odsInternalViewForm setrresolutionMessage">
+                    </p:commandButton>
+                    <p:spacer width="20"/>
+                    <p:commandButton value="#{msgs['DialogButton.Cancel']}" type="button"
+                                     styleClass="hrcrm-button"
+                                     onclick="PF('rezol2').show();"/>
+                </h:panelGroup>
+            </h:form>
+        </f:facet>
+    </p:confirmDialog>
+    <p:confirmDialog message="#{msgs['Popup.CancelSetResolution']}"
+                     widgetVar="rezol2" closable="false" severity="alert">
+        <h:panelGroup layout="block" style="text-align: right">
+            <h:form>
+                <p:commandButton value="#{msgs['DialogButton.Ok']}"
+                                 styleClass="hrcrm-button"
+                                 action="#{odsInternalBean.resetSets()}"
+                                 onclick="PF('rezol2').hide();"
+                                 oncomplete="PF('rezol1').hide();"/>
+                <p:spacer width="20"/>
+
+                <p:commandButton value="#{msgs['DialogButton.Cancel']}" type="button"
+                                 styleClass="hrcrm-button" onclick="PF('rezol2').hide();"/>
+            </h:form>
+        </h:panelGroup>
+    </p:confirmDialog>
+
+
+</ui:composition>

@@ -6,8 +6,166 @@
                    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.3.xsd
                    http://www.liquibase.org/xml/ns/dbchangelog-ext
                    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
-
-
-
+    <changeSet id="1423221466300-1" author="spopov">
+        <createTable tableName="COMPLEXITY">
+            <column autoIncrement="true" name="ID" type="BIGINT(19)">
+                <constraints primaryKey="true" primaryKeyName="CONSTRAINT_F"/>
+            </column>
+            <column name="COMPLEXITY" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="SPopov" id="1423221466300-2">
+        <createTable tableName="PRIORITY">
+            <column autoIncrement="true" name="ID" type="BIGINT(19)">
+                <constraints primaryKey="true" primaryKeyName="CONSTRAINT_E"/>
+            </column>
+            <column name="PRIORITY" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="SPopov" id="1423221466300-3">
+        <createTable tableName="RESOLUTION">
+            <column autoIncrement="true" name="ID" type="BIGINT(19)">
+                <constraints primaryKey="true" primaryKeyName="CONSTRAINT_B"/>
+            </column>
+            <column name="RESOLUTION" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="SPopov" id="1423221466300-4">
+        <createTable tableName="STATUS">
+            <column autoIncrement="true" name="ID" type="BIGINT(19)">
+                <constraints primaryKey="true" primaryKeyName="CONSTRAINT_9"/>
+            </column>
+            <column name="STATUS" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="SPopov" id="1423221466300-5">
+        <createTable tableName="TASK">
+            <column name="TASK_TYPE" type="VARCHAR(31)">
+                <constraints nullable="false"/>
+            </column>
+            <column autoIncrement="true" name="ID" type="BIGINT(19)">
+                <constraints primaryKey="true" primaryKeyName="CONSTRAINT_2"/>
+            </column>
+            <column name="CLOSEDDATE" type="date"/>
+            <column name="CREATIONDATE" type="date"/>
+            <column name="DESCRIPTION" type="VARCHAR(255)"/>
+            <column name="DUEDATE" type="date"/>
+            <column name="SUMMARY" type="VARCHAR(255)"/>
+            <column name="UPDATEDATE" type="date"/>
+            <column name="ASSIGNEE_ID" type="BIGINT(19)"/>
+            <column name="COMPLEXITY_ID" type="BIGINT(19)"/>
+            <column name="CREATOR_ID" type="BIGINT(19)"/>
+            <column name="PRIORITY_ID" type="BIGINT(19)"/>
+            <column name="RESOLUTION_ID" type="BIGINT(19)"/>
+            <column name="STATUS_ID" type="BIGINT(19)"/>
+            <column name="TASKTYPE_ID" type="BIGINT(19)"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="SPopov" id="1423221466300-6">
+        <createTable tableName="TASKTYPE">
+            <column autoIncrement="true" name="ID" type="BIGINT(19)">
+                <constraints primaryKey="true" primaryKeyName="CONSTRAINT_1"/>
+            </column>
+            <column name="TASKTYPE" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="SPopov" id="1423221466300-7">
+        <createTable tableName="PERSON">
+            <column autoIncrement="true" name="ID" type="BIGINT(19)">
+                <constraints primaryKey="true" primaryKeyName="CONSTRAINT_27"/>
+            </column>
+            <column name="FIRSTNAME" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="LASTNAME" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="SPopov" id="1423221466300-8">
+        <addUniqueConstraint columnNames="STATUS" constraintName="UK_5UOQ7NG0NX4YJY41L0384ITYF" deferrable="false"
+                             disabled="false" initiallyDeferred="false" tableName="STATUS"/>
+    </changeSet>
+    <changeSet id="1423221466300-9" author="SPopov">
+        <addUniqueConstraint columnNames="RESOLUTION" constraintName="UK_E9GU0NERFTHUBGP42RXL0KE26" deferrable="false"
+                             disabled="false" initiallyDeferred="false" tableName="RESOLUTION"/>
+    </changeSet>
+    <changeSet author="SPopov" id="1423221466300-10">
+        <addUniqueConstraint columnNames="PRIORITY" constraintName="UK_GUFG4IMW33MITW5O5RMKJWHB6" deferrable="false"
+                             disabled="false" initiallyDeferred="false" tableName="PRIORITY"/>
+    </changeSet>
+    <changeSet author="SPopov" id="1423221466300-11">
+        <addUniqueConstraint columnNames="COMPLEXITY" constraintName="UK_J5Y2ITL551283QD6Y8YM511I2" deferrable="false"
+                             disabled="false" initiallyDeferred="false" tableName="COMPLEXITY"/>
+    </changeSet>
+    <changeSet author="SPopov" id="1423221466300-12">
+        <addUniqueConstraint columnNames="TASKTYPE" constraintName="UK_L9UPPNYC81G1QBCR6UU0QDHOH" deferrable="false"
+                             disabled="false" initiallyDeferred="false" tableName="TASKTYPE"/>
+    </changeSet>
+    <changeSet author="SPopov" id="1423221466300-13">
+        <addForeignKeyConstraint baseColumnNames="ASSIGNEE_ID" baseTableName="TASK"
+                                 constraintName="FK_5SCVEB1KLHNB5YTH32T1O6UHY" deferrable="false"
+                                 initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT"
+                                 referencedColumnNames="ID" referencedTableName="PERSON"/>
+    </changeSet>
+    <changeSet author="SPopov" id="1423221466300-14">
+        <addForeignKeyConstraint baseColumnNames="RESOLUTION_ID" baseTableName="TASK"
+                                 constraintName="FK_775TTTS188HUSXN8GYRD1G1D8" deferrable="false"
+                                 initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT"
+                                 referencedColumnNames="ID" referencedTableName="RESOLUTION"/>
+    </changeSet>
+    <changeSet author="SPopov" id="1423221466300-15">
+        <addForeignKeyConstraint baseColumnNames="CREATOR_ID" baseTableName="TASK"
+                                 constraintName="FK_7D5JN0DNIAB56YNO3BPIJR5N4" deferrable="false"
+                                 initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT"
+                                 referencedColumnNames="ID" referencedTableName="PERSON"/>
+    </changeSet>
+    <changeSet author="SPopov" id="1423221466300-16">
+        <addForeignKeyConstraint baseColumnNames="PRIORITY_ID" baseTableName="TASK"
+                                 constraintName="FK_9G2H9MPW1NBDGELSJ2RP8SOVW" deferrable="false"
+                                 initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT"
+                                 referencedColumnNames="ID" referencedTableName="PRIORITY"/>
+    </changeSet>
+    <changeSet author="SPopov" id="1423221466300-17">
+        <addForeignKeyConstraint baseColumnNames="STATUS_ID" baseTableName="TASK"
+                                 constraintName="FK_O4FB4OQ31UJ3Q13YRCQB65N0V" deferrable="false"
+                                 initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT"
+                                 referencedColumnNames="ID" referencedTableName="STATUS"/>
+    </changeSet>
+    <changeSet author="SPopov" id="1423221466300-18">
+        <addForeignKeyConstraint baseColumnNames="TASKTYPE_ID" baseTableName="TASK"
+                                 constraintName="FK_SQUFI6YV9WDER7RLA6QIEQ9K" deferrable="false"
+                                 initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT"
+                                 referencedColumnNames="ID" referencedTableName="TASKTYPE"/>
+    </changeSet>
+    <changeSet author="SPopov" id="1423221466300-19">
+        <addForeignKeyConstraint baseColumnNames="COMPLEXITY_ID" baseTableName="TASK"
+                                 constraintName="FK_SVNUJMWWX0I43DGN4LUVY2UOC" deferrable="false"
+                                 initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT"
+                                 referencedColumnNames="ID" referencedTableName="COMPLEXITY"/>
+    </changeSet>
+    <changeSet author="MYaskov" id="1423221466300-20">
+        <modifyDataType tableName="TASK" columnName="SUMMARY" newDataType="VARCHAR(2048)"/>
+    </changeSet>
+    <changeSet author="MYaskov" id="1423221466300-21">
+        <renameColumn tableName="TASK" oldColumnName="DESCRIPTION" newColumnName="DESC_TO_CLOB"/>
+        <addColumn tableName="TASK">
+            <column name="DESCRIPTION" type="CLOB(8000)"/>
+        </addColumn>
+        <sql>
+            UPDATE TASK SET DESCRIPTION = DESC_TO_CLOB;
+        </sql>
+        <dropColumn tableName="TASK" columnName="DESC_TO_CLOB"/>
+    </changeSet>
 </databaseChangeLog>
 
